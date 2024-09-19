@@ -3,8 +3,11 @@ import axios from 'axios';
 import { ethers, BrowserProvider, Contract } from 'ethers';
 
 // Replace with your actual contract ABI and address
-const contractABI = [/* Your contract ABI here */];
-const contractAddress = "Your_Contract_Address_Here";
+const PEPE_CONTRACT_ADDRESS = '0x6982508145454ce325ddbe47a25d4ec3d2311933';
+const PEPE_ABI = [
+  'function balanceOf(address account) external view returns (uint256)',
+  'function transfer(address recipient, uint256 amount) external returns (bool)'
+];
 
 function App() {
   const [formData, setFormData] = useState({
@@ -18,6 +21,7 @@ function App() {
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pepeBalance, setPepeBalance] = useState(null);
 
   useEffect(() => {
     const initEthers = async () => {
@@ -83,12 +87,23 @@ function App() {
   };
 
   const connectWallet = async () => {
-    if (provider) {
+    if (typeof window.ethereum !== 'undefined') {
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const signer = await provider.getSigner();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(provider);
+  
+        const signer = provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
+  
+        const nftContract = new ethers.Contract(contractAddress, contractABI, signer);
+        setContract(nftContract);
+  
+        const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
+        const balance = await pepeContract.balanceOf(address);
+        setPepeBalance(ethers.utils.formatUnits(balance, 18));
+  
       } catch (error) {
         console.error("Failed to connect wallet:", error);
       }
@@ -100,11 +115,16 @@ function App() {
   return (
     <div className="App">
       <h1>Pepe NFT Generator</h1>
-      {account ? (
-        <p>Connected: {account}</p>
-      ) : (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      )}
+      <div className="wallet-info">
+        {account ? (
+          <div>
+            <p>Connected: {account}</p>
+            <p>PEPE Balance: {pepeBalance ? `${pepeBalance} PEPE` : 'Loading...'}</p>
+          </div>
+        ) : (
+          <button onClick={connectWallet}>Connect Wallet</button>
+        )}
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
