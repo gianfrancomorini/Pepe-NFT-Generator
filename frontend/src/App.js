@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider, Contract } from 'ethers';
 
 // Replace with your actual contract ABI and address
 const contractABI = [/* Your contract ABI here */];
@@ -17,25 +17,23 @@ function App() {
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const initEthers = async () => {
-      // Check if MetaMask is installed
       if (typeof window.ethereum !== 'undefined') {
         try {
-          // Request account access
           await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const provider = new BrowserProvider(window.ethereum);
           setProvider(provider);
 
-          const signer = provider.getSigner();
+          const signer = await provider.getSigner();
           const address = await signer.getAddress();
           setAccount(address);
 
-          const nftContract = new ethers.Contract(contractAddress, contractABI, signer);
+          const nftContract = new Contract(contractAddress, contractABI, signer);
           setContract(nftContract);
 
-          // Listen for account changes
           window.ethereum.on('accountsChanged', (accounts) => {
             setAccount(accounts[0]);
           });
@@ -49,7 +47,6 @@ function App() {
 
     initEthers();
 
-    // Cleanup function to remove event listener
     return () => {
       if (window.ethereum && window.ethereum.removeListener) {
         window.ethereum.removeListener('accountsChanged', setAccount);
@@ -63,18 +60,20 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsGenerating(true);
     try {
       const response = await axios.post('http://localhost:3001/generate-image', formData);
       setGeneratedImage(response.data.imageUrl);
     } catch (error) {
       console.error('Error generating image:', error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const mintNFT = async () => {
     if (!contract || !generatedImage) return;
     try {
-      // Assuming your contract has a `mintNFT` function that takes a URI
       const tx = await contract.mintNFT(generatedImage);
       await tx.wait();
       alert('NFT minted successfully!');
@@ -87,7 +86,7 @@ function App() {
     if (provider) {
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const signer = provider.getSigner();
+        const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
       } catch (error) {
@@ -135,7 +134,9 @@ function App() {
           value={formData.background}
           onChange={handleInputChange}
         />
-        <button type="submit">Generate Pepe</button>
+        <button type="submit" disabled={isGenerating}>
+          {isGenerating ? 'Generating...' : 'Generate Pepe'}
+        </button>
       </form>
       {generatedImage && (
         <div>
