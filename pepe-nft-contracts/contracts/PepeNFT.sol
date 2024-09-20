@@ -1,23 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract PepeNFT is ERC721, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    using SafeMath for uint256;
+    
+    uint256 private _tokenIds;
 
     mapping(uint256 => string) private _tokenURIs;
 
     constructor() ERC721("PepeNFT", "PEPE") {}
 
-    function mintNFT(address recipient, string memory tokenURI) public onlyOwner returns (uint256) {
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
+    function mintNFT(address recipient, string memory _tokenURI) public onlyOwner returns (uint256) {
+        _tokenIds = _tokenIds.add(1);
+        uint256 newItemId = _tokenIds;
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId, tokenURI);
+        _setTokenURI(newItemId, _tokenURI);
         return newItemId;
     }
 

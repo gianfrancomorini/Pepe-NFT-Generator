@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ethers, BrowserProvider, Contract } from 'ethers';
+import { ethers } from 'ethers';
 
 // Replace with your actual contract ABI and address
+const contractABI = [/* Your contract ABI here */];
+const contractAddress = "Your_Contract_Address_Here";
+
 const PEPE_CONTRACT_ADDRESS = '0x6982508145454ce325ddbe47a25d4ec3d2311933';
 const PEPE_ABI = [
   'function balanceOf(address account) external view returns (uint256)',
@@ -20,23 +23,27 @@ function App() {
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [pepeBalance, setPepeBalance] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const initEthers = async () => {
       if (typeof window.ethereum !== 'undefined') {
         try {
           await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const provider = new BrowserProvider(window.ethereum);
+          const provider = new ethers.BrowserProvider(window.ethereum);
           setProvider(provider);
 
           const signer = await provider.getSigner();
           const address = await signer.getAddress();
           setAccount(address);
 
-          const nftContract = new Contract(contractAddress, contractABI, signer);
+          const nftContract = new ethers.Contract(contractAddress, contractABI, signer);
           setContract(nftContract);
+
+          const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
+          const balance = await pepeContract.balanceOf(address);
+          setPepeBalance(ethers.formatUnits(balance, 18));
 
           window.ethereum.on('accountsChanged', (accounts) => {
             setAccount(accounts[0]);
@@ -78,7 +85,7 @@ function App() {
   const mintNFT = async () => {
     if (!contract || !generatedImage) return;
     try {
-      const tx = await contract.mintNFT(generatedImage);
+      const tx = await contract.mintNFT(account, generatedImage);
       await tx.wait();
       alert('NFT minted successfully!');
     } catch (error) {
@@ -87,23 +94,16 @@ function App() {
   };
 
   const connectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (provider) {
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        setProvider(provider);
-  
-        const signer = provider.getSigner();
+        const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-  
-        const nftContract = new ethers.Contract(contractAddress, contractABI, signer);
-        setContract(nftContract);
-  
+
         const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
         const balance = await pepeContract.balanceOf(address);
-        setPepeBalance(ethers.utils.formatUnits(balance, 18));
-  
+        setPepeBalance(ethers.formatUnits(balance, 18));
       } catch (error) {
         console.error("Failed to connect wallet:", error);
       }
