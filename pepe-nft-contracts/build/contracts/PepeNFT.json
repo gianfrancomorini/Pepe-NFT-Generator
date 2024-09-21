@@ -20463,7 +20463,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-09-20T03:45:01.295Z",
+  "updatedAt": "2024-09-21T04:02:59.135Z",
   "devdoc": {
     "events": {
       "Approval(address,address,uint256)": {
