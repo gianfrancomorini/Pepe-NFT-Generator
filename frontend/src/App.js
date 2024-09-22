@@ -6,7 +6,8 @@ import { create } from 'ipfs-http-client';
 // IPFS configuration (using Infura as an example)
 const projectId = '5013c224cf674b928b90a9801887967c';
 const projectSecret = 'Nc8DK/ZCr1D0ExEsVxAPsA2rXGblzEqVTEAsBbPcqNoersCoFQ+1/g';
-const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+const auth = 'Basic ' + btoa(projectId + ':' + projectSecret);
+
 const client = create({
   host: 'ipfs.infura.io',
   port: 5001,
