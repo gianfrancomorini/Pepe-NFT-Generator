@@ -4,6 +4,7 @@
     "@truffle/hdwallet-provider": "^2.1.15",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
+    "ipfs-http-client": "^60.0.1",
     "truffle-plugin-verify": "^0.6.7"
   }
 }
