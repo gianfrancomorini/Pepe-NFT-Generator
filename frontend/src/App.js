@@ -508,9 +508,18 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
+    console.log('Starting image generation process...');
     try {
+      console.log('Sending request to backend:', formData);
       const response = await axios.post('http://localhost:3001/generate-image', formData);
-      setGeneratedImage(response.data.imageUrl);
+      console.log('Received response from backend:', response.data);
+      
+      if (response.data.imageUrl) {
+        console.log('Setting generated image URL:', response.data.imageUrl);
+        setGeneratedImage(response.data.imageUrl);
+      } else {
+        console.error('No image URL in response');
+      }
       
       // Create and upload metadata
       const metadata = {
@@ -524,13 +533,16 @@ function App() {
           { trait_type: "Background", value: formData.background }
         ]
       };
-
+  
+      console.log('Uploading metadata to IPFS:', metadata);
       const metadataUrl = await uploadToIPFS(metadata);
+      console.log('Metadata uploaded, IPFS URL:', metadataUrl);
       setMetadataUrl(metadataUrl);
     } catch (error) {
       console.error('Error generating image or uploading metadata:', error);
     } finally {
       setIsGenerating(false);
+      console.log('Generation process completed.');
     }
   };
 
