@@ -516,16 +516,14 @@ function App() {
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
-        console.log('Uploading image to IPFS...');
-        const ipfsImageUrl = await uploadImageToIPFS(response.data.imageUrl);
-        console.log('Image uploaded to IPFS:', ipfsImageUrl);
-        setGeneratedImage(ipfsImageUrl);
+        console.log('Image uploaded to IPFS:', response.data.imageUrl);
+        setGeneratedImage(response.data.imageUrl);
         
-        // Create and upload metadata
+        // Create metadata
         const metadata = {
           name: `Pepe NFT #${Date.now()}`,
           description: "A unique Pepe NFT with custom attributes",
-          image: ipfsImageUrl,
+          image: response.data.imageUrl,
           attributes: [
             { trait_type: "Emotion", value: formData.emotion },
             { trait_type: "Clothes", value: formData.clothes },
@@ -535,9 +533,9 @@ function App() {
         };
     
         console.log('Uploading metadata to IPFS:', metadata);
-        const metadataUrl = await uploadToIPFS(metadata);
-        console.log('Metadata uploaded, IPFS URL:', metadataUrl);
-        setMetadataUrl(metadataUrl);
+        const metadataResponse = await axios.post('http://localhost:3001/upload-metadata', metadata);
+        console.log('Metadata uploaded, IPFS URL:', metadataResponse.data.metadataUrl);
+        setMetadataUrl(metadataResponse.data.metadataUrl);
       } else {
         console.error('No image URL in response');
       }
@@ -548,7 +546,7 @@ function App() {
       console.log('Generation process completed.');
     }
   };
-  
+
   const uploadToIPFS = async (metadata) => {
     try {
       const result = await client.add(JSON.stringify(metadata));
