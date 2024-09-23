@@ -6,6 +6,7 @@ import { create } from 'ipfs-http-client';
 // IPFS configuration (using Infura)
 const projectId = '5013c224cf674b928b90a9801887967c';
 const projectSecret = 'Nc8DK/ZCr1D0ExEsVxAPsA2rXGblzEqVTEAsBbPcqNoersCoFQ+1/g';
+const auth = 'Basic ' + btoa(projectId + ':' + projectSecret);
 
 
 const client = create({
@@ -13,7 +14,7 @@ const client = create({
   port: 5001,
   protocol: 'https',
   headers: {
-    authorization: 'Basic ' + btoa(projectId + ':' + projectSecret),
+    authorization: auth,
   },
 });
 
@@ -515,29 +516,31 @@ function App() {
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
-        console.log('Setting generated image URL:', response.data.imageUrl);
-        setGeneratedImage(response.data.imageUrl);
+        console.log('Uploading image to IPFS...');
+        const ipfsImageUrl = await uploadImageToIPFS(response.data.imageUrl);
+        console.log('Image uploaded to IPFS:', ipfsImageUrl);
+        setGeneratedImage(ipfsImageUrl);
+        
+        // Create and upload metadata
+        const metadata = {
+          name: `Pepe NFT #${Date.now()}`,
+          description: "A unique Pepe NFT with custom attributes",
+          image: ipfsImageUrl,
+          attributes: [
+            { trait_type: "Emotion", value: formData.emotion },
+            { trait_type: "Clothes", value: formData.clothes },
+            { trait_type: "Accessories", value: formData.accessories },
+            { trait_type: "Background", value: formData.background }
+          ]
+        };
+    
+        console.log('Uploading metadata to IPFS:', metadata);
+        const metadataUrl = await uploadToIPFS(metadata);
+        console.log('Metadata uploaded, IPFS URL:', metadataUrl);
+        setMetadataUrl(metadataUrl);
       } else {
         console.error('No image URL in response');
       }
-      
-      // Create and upload metadata
-      const metadata = {
-        name: `Pepe NFT #${Date.now()}`,
-        description: "A unique Pepe NFT with custom attributes",
-        image: response.data.imageUrl,
-        attributes: [
-          { trait_type: "Emotion", value: formData.emotion },
-          { trait_type: "Clothes", value: formData.clothes },
-          { trait_type: "Accessories", value: formData.accessories },
-          { trait_type: "Background", value: formData.background }
-        ]
-      };
-  
-      console.log('Uploading metadata to IPFS:', metadata);
-      const metadataUrl = await uploadToIPFS(metadata);
-      console.log('Metadata uploaded, IPFS URL:', metadataUrl);
-      setMetadataUrl(metadataUrl);
     } catch (error) {
       console.error('Error generating image or uploading metadata:', error);
     } finally {
@@ -545,13 +548,29 @@ function App() {
       console.log('Generation process completed.');
     }
   };
-
+  
   const uploadToIPFS = async (metadata) => {
     try {
       const result = await client.add(JSON.stringify(metadata));
+      console.log('IPFS upload result:', result);
       return `https://ipfs.io/ipfs/${result.path}`;
     } catch (error) {
       console.error('Error uploading to IPFS:', error);
+      if (error.message.includes('project ID does not have access')) {
+        console.error('Please ensure your Infura project has IPFS access enabled.');
+      }
+      throw error;
+    }
+  };
+
+  const uploadImageToIPFS = async (imageUrl) => {
+    try {
+      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const buffer = Buffer.from(response.data, 'binary');
+      const result = await client.add(buffer);
+      return `https://ipfs.io/ipfs/${result.path}`;
+    } catch (error) {
+      console.error('Error uploading image to IPFS:', error);
       throw error;
     }
   };
