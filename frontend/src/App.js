@@ -3,17 +3,17 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import { create } from 'ipfs-http-client';
 
-// IPFS configuration (using Infura as an example)
+// IPFS configuration (using Infura)
 const projectId = '5013c224cf674b928b90a9801887967c';
 const projectSecret = 'Nc8DK/ZCr1D0ExEsVxAPsA2rXGblzEqVTEAsBbPcqNoersCoFQ+1/g';
-const auth = 'Basic ' + btoa(projectId + ':' + projectSecret);
+
 
 const client = create({
   host: 'ipfs.infura.io',
   port: 5001,
   protocol: 'https',
   headers: {
-    authorization: auth,
+    authorization: 'Basic ' + btoa(projectId + ':' + projectSecret),
   },
 });
 
@@ -557,10 +557,35 @@ function App() {
   };
 
   const mintNFT = async () => {
-    if (!contract || !metadataUrl) return;
+    if (!contract || !metadataUrl) {
+      console.error('Contract or metadata URL is not available');
+      return;
+    }
     try {
+      console.log('Minting NFT with metadata URL:', metadataUrl);
       const tx = await contract.mintNFT(account, metadataUrl);
-      await tx.wait();
+      console.log('Transaction sent:', tx.hash);
+      const receipt = await tx.wait();
+      console.log('Transaction confirmed:', receipt.transactionHash);
+      
+      // Fetch the token ID from the transaction receipt
+      const transferEvent = receipt.logs.find(log => log.eventName === 'Transfer');
+      const tokenId = transferEvent.args.tokenId;
+      
+      // Fetch the token URI
+      const tokenURI = await contract.tokenURI(tokenId);
+      console.log('Token URI:', tokenURI);
+      
+      // Fetch the metadata
+      const response = await axios.get(tokenURI);
+      const metadata = response.data;
+      console.log('NFT Metadata:', metadata);
+      
+      // Update the UI with the minted NFT image
+      if (metadata.image) {
+        setGeneratedImage(metadata.image);
+      }
+      
       alert('NFT minted successfully!');
     } catch (error) {
       console.error('Error minting NFT:', error);
