@@ -3,6 +3,7 @@ const cors = require('cors');
 const { OpenAI } = require('openai');
 const axios = require('axios');
 const { create } = require('ipfs-http-client');
+const ipfsClient = require('ipfs-http-client');
 require('dotenv').config();
 
 const app = express();
