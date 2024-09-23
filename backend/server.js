@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { OpenAI } = require('openai');
 const axios = require('axios');
-const { create } = require('ipfs-http-client');
-const ipfsClient = require('ipfs-http-client');
+const ipfsHttpClient = require('ipfs-http-client');
 require('dotenv').config();
 
 const app = express();
@@ -21,7 +20,7 @@ const projectId = process.env.INFURA_PROJECT_ID;
 const projectSecret = process.env.INFURA_PROJECT_SECRET;
 const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
 
-const ipfsClient = create({
+const ipfsClient = ipfsHttpClient.create({
   host: 'ipfs.infura.io',
   port: 5001,
   protocol: 'https',
