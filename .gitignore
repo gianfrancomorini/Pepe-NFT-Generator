@@ -6,3 +6,9 @@ backend/.env
 
 # Ignore the .env file in the "pepe-nft-contracts" directory
 pepe-nft-contracts/.env
+
+# Ignore node_modules and cache files
+node_modules/
+.cache/
+frontend/node_modules/
+frontend/node_modules/.cache/
