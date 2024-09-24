@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const { OpenAI } = require('openai');
+const { OpenAIApi } = require('openai');
+require('dotenv').config();
 const axios = require('axios');
 const ipfsHttpClient = require('ipfs-http-client');
 require('dotenv').config();
@@ -11,7 +12,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-const openai = new OpenAI({
+const openai = new OpenAIApi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -32,28 +33,36 @@ const ipfsClient = ipfsHttpClient.create({
 app.post('/generate-image', async (req, res) => {
   try {
     const { emotion, clothes, accessories, background } = req.body;
-    const prompt = `A cartoon frog Pepe looking ${emotion}, wearing ${clothes} and ${accessories}, standing in front of a ${background} background`;
+    console.log('Received request:', { emotion, clothes, accessories, background });
 
-    const response = await openai.images.generate({
-      model: "dall-e-3",
+    const prompt = `A cartoon frog with friendly facial features looking joyful, wearing a professional suit and carrying a briefcase, standing in an office setting.`;
+    console.log('Generated prompt:', prompt);
+
+    const response = await openai.createImage({
       prompt: prompt,
-      size: "1024x1024",
-      quality: "standard",
       n: 1,
+      size: "1024x1024",
     });
 
-    const imageUrl = response.data[0].url;
+    console.log('OpenAI response:', response);
+
+    const imageUrl = response.data.data[0].url;
+    console.log('Generated image URL:', imageUrl);
     
     // Upload the generated image to IPFS
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(imageResponse.data, 'binary');
     const result = await ipfsClient.add(buffer);
     const ipfsUrl = `https://ipfs.io/ipfs/${result.path}`;
+    console.log('IPFS URL:', ipfsUrl);
 
     res.json({ imageUrl: ipfsUrl });
   } catch (error) {
-    console.error('Error generating image or uploading to IPFS:', error);
-    res.status(500).json({ error: 'Failed to generate image or upload to IPFS' });
+    console.error('Error in /generate-image:', error);
+    if (error.response) {
+      console.error('OpenAI API error:', error.response.data);
+    }
+    res.status(500).json({ error: 'Failed to generate image or upload to IPFS', details: error.message });
   }
 });
 

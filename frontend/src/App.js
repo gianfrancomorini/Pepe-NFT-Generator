@@ -8,7 +8,6 @@ const projectId = '5013c224cf674b928b90a9801887967c';
 const projectSecret = 'Nc8DK/ZCr1D0ExEsVxAPsA2rXGblzEqVTEAsBbPcqNoersCoFQ+1/g';
 const auth = 'Basic ' + btoa(projectId + ':' + projectSecret);
 
-
 const client = create({
   host: 'ipfs.infura.io',
   port: 5001,
@@ -18,7 +17,7 @@ const client = create({
   },
 });
 
-// Replace with your actual contract ABI and address
+// Contract ABI and addresses
 const contractABI = [
     {
       "inputs": [],
@@ -439,7 +438,7 @@ const contractABI = [
       "stateMutability": "view",
       "type": "function",
       "constant": true
-    }];
+    }]; // ABI truncated for brevity
 const contractAddress = "0x53D99642Ea46039c2AB681cabd4B7Df7CD87DE19";
 
 const PEPE_CONTRACT_ADDRESS = '0x6982508145454ce325ddbe47a25d4ec3d2311933';
@@ -449,12 +448,8 @@ const PEPE_ABI = [
 ];
 
 function App() {
-  const [formData, setFormData] = useState({
-    emotion: '',
-    clothes: '',
-    accessories: '',
-    background: ''
-  });
+  // State variables
+  const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
   const [generatedImage, setGeneratedImage] = useState(null);
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
@@ -462,7 +457,11 @@ function App() {
   const [pepeBalance, setPepeBalance] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [metadataUrl, setMetadataUrl] = useState(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+
+  // Effect for initializing ethers and connecting to the wallet
   useEffect(() => {
     const initEthers = async () => {
       if (typeof window.ethereum !== 'undefined') {
@@ -502,10 +501,12 @@ function App() {
     };
   }, []);
 
+  // Form input handler
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
@@ -548,6 +549,7 @@ function App() {
     }
   };
 
+  // IPFS upload functions
   const uploadToIPFS = async (metadata) => {
     try {
       const result = await client.add(JSON.stringify(metadata));
@@ -571,8 +573,7 @@ function App() {
     }
   };
 
-  const [isImageLoading, setIsImageLoading] = useState(false);
-
+  // NFT minting function
   const mintNFT = async () => {
     if (!contract || !metadataUrl) {
       console.error('Contract or metadata URL is not available');
@@ -611,20 +612,7 @@ function App() {
     }
   };
 
-  setIsImageLoading(true);
-if (metadata.image) {
-  const img = new Image();
-  img.onload = () => {
-    setGeneratedImage(metadata.image);
-    setIsImageLoading(false);
-  };
-  img.onerror = () => {
-    console.error('Failed to load image');
-    setIsImageLoading(false);
-  };
-  img.src = metadata.image;
-}
-
+  // Wallet connection function
   const connectWallet = async () => {
     if (provider) {
       try {
@@ -644,6 +632,7 @@ if (metadata.image) {
     }
   };
 
+  // Render component
   return (
     <div className="App">
       <h1>Pepe NFT Generator</h1>
@@ -658,34 +647,10 @@ if (metadata.image) {
         )}
       </div>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="emotion"
-          placeholder="Emotion"
-          value={formData.emotion}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="clothes"
-          placeholder="Clothes"
-          value={formData.clothes}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="accessories"
-          placeholder="Accessories"
-          value={formData.accessories}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="background"
-          placeholder="Background"
-          value={formData.background}
-          onChange={handleInputChange}
-        />
+        <input type="text" name="emotion" placeholder="Emotion" value={formData.emotion} onChange={handleInputChange} />
+        <input type="text" name="clothes" placeholder="Clothes" value={formData.clothes} onChange={handleInputChange} />
+        <input type="text" name="accessories" placeholder="Accessories" value={formData.accessories} onChange={handleInputChange} />
+        <input type="text" name="background" placeholder="Background" value={formData.background} onChange={handleInputChange} />
         <button type="submit" disabled={isGenerating}>
           {isGenerating ? 'Generating...' : 'Generate Pepe'}
         </button>

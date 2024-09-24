@@ -6,6 +6,7 @@
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
     "ipfs-http-client": "^50.1.2",
+    "openai": "^4.63.0",
     "truffle-plugin-verify": "^0.6.7"
   }
 }
