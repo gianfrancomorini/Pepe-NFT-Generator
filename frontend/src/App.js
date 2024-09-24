@@ -516,14 +516,15 @@ function App() {
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
-        console.log('Image uploaded to IPFS:', response.data.imageUrl);
-        setGeneratedImage(response.data.imageUrl);
+        const ipfsImageUrl = await uploadImageToIPFS(response.data.imageUrl);
+        console.log('Image uploaded to IPFS:', ipfsImageUrl);
+        setGeneratedImage(ipfsImageUrl);
         
         // Create metadata
         const metadata = {
           name: `Pepe NFT #${Date.now()}`,
           description: "A unique Pepe NFT with custom attributes",
-          image: response.data.imageUrl,
+          image: ipfsImageUrl,
           attributes: [
             { trait_type: "Emotion", value: formData.emotion },
             { trait_type: "Clothes", value: formData.clothes },
@@ -551,12 +552,9 @@ function App() {
     try {
       const result = await client.add(JSON.stringify(metadata));
       console.log('IPFS upload result:', result);
-      return `https://ipfs.io/ipfs/${result.path}`;
+      return `https://${projectId}.ipfs.infura-ipfs.io/ipfs/${result.path}`;
     } catch (error) {
       console.error('Error uploading to IPFS:', error);
-      if (error.message.includes('project ID does not have access')) {
-        console.error('Please ensure your Infura project has IPFS access enabled.');
-      }
       throw error;
     }
   };
@@ -573,9 +571,12 @@ function App() {
     }
   };
 
+  const [isImageLoading, setIsImageLoading] = useState(false);
+
   const mintNFT = async () => {
     if (!contract || !metadataUrl) {
       console.error('Contract or metadata URL is not available');
+      alert('Unable to mint NFT. Please ensure you are connected and have generated an image.');
       return;
     }
     try {
@@ -606,8 +607,23 @@ function App() {
       alert('NFT minted successfully!');
     } catch (error) {
       console.error('Error minting NFT:', error);
+      alert(`Failed to mint NFT: ${error.message}`);
     }
   };
+
+  setIsImageLoading(true);
+if (metadata.image) {
+  const img = new Image();
+  img.onload = () => {
+    setGeneratedImage(metadata.image);
+    setIsImageLoading(false);
+  };
+  img.onerror = () => {
+    console.error('Failed to load image');
+    setIsImageLoading(false);
+  };
+  img.src = metadata.image;
+}
 
   const connectWallet = async () => {
     if (provider) {
