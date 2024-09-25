@@ -3,7 +3,7 @@ const cors = require('cors');
 const OpenAI = require('openai');
 require('dotenv').config();
 const axios = require('axios');
-const { create } = require('ipfs-http-client');
+const pinataSDK = require('@pinata/sdk');
 
 const app = express();
 app.use(cors());
@@ -15,20 +15,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// IPFS configuration (using Infura)
+// IPFS configuration (using Pinata)
 
-
-const projectId = process.env.INFURA_PROJECT_ID;
-const projectSecret = process.env.INFURA_PROJECT_SECRET;
-const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-
-const ipfsClient = create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: auth,
-  },
+const pinata = new pinataSDK({ 
+  pinataApiKey: process.env.PINATA_API_KEY, 
+  pinataSecretApiKey: process.env.PINATA_API_SECRET 
 });
 
 app.post('/generate-image', async (req, res) => {
@@ -50,18 +41,22 @@ app.post('/generate-image', async (req, res) => {
     const imageUrl = response.data[0].url;
     console.log('Generated image URL:', imageUrl);
     
-    // Upload the generated image to IPFS
+    // Upload the generated image to IPFS using Pinata
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(imageResponse.data, 'binary');
-    const result = await ipfsClient.add(buffer);
-    const ipfsUrl = `https://ipfs.io/ipfs/${result.path}`;
+    const result = await pinata.pinFileToIPFS(buffer, {
+      pinataMetadata: {
+        name: `Pepe-NFT-${Date.now()}.png`
+      }
+    });
+    const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
     console.log('IPFS URL:', ipfsUrl);
 
     res.json({ imageUrl: ipfsUrl });
   } catch (error) {
     console.error('Error in /generate-image:', error);
     if (error.response) {
-      console.error('OpenAI API error:', error.response.data);
+      console.error('API error:', error.response.data);
     }
     res.status(500).json({ error: 'Failed to generate image or upload to IPFS', details: error.message });
   }
@@ -70,12 +65,12 @@ app.post('/generate-image', async (req, res) => {
 app.post('/upload-metadata', async (req, res) => {
   try {
     const metadata = req.body;
-    const result = await ipfsClient.add(JSON.stringify(metadata));
-    const metadataUrl = `https://ipfs.io/ipfs/${result.path}`;
+    const result = await pinata.pinJSONToIPFS(metadata);
+    const metadataUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
     res.json({ metadataUrl });
   } catch (error) {
     console.error('Error uploading metadata to IPFS:', error);
-    res.status(500).json({ error: 'Failed to upload metadata to IPFS' });
+    res.status(500).json({ error: 'Failed to upload metadata to IPFS', details: error.message });
   }
 });
 

@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { create } from 'ipfs-http-client';
-
-// IPFS configuration (using Infura)
-const projectId = '5013c224cf674b928b90a9801887967c';
-const projectSecret = 'Nc8DK/ZCr1D0ExEsVxAPsA2rXGblzEqVTEAsBbPcqNoersCoFQ+1/g';
-const auth = 'Basic ' + btoa(projectId + ':' + projectSecret);
-
-const client = create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: auth,
-  },
-});
 
 // Contract ABI and addresses
 const contractABI = [
@@ -448,7 +433,6 @@ const PEPE_ABI = [
 ];
 
 function App() {
-  // State variables
   const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
   const [generatedImage, setGeneratedImage] = useState(null);
   const [account, setAccount] = useState(null);
@@ -457,11 +441,8 @@ function App() {
   const [pepeBalance, setPepeBalance] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [metadataUrl, setMetadataUrl] = useState(null);
-  const [isImageLoading, setIsImageLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
-  // Effect for initializing ethers and connecting to the wallet
   useEffect(() => {
     const initEthers = async () => {
       if (typeof window.ethereum !== 'undefined') {
@@ -486,9 +467,10 @@ function App() {
           });
         } catch (error) {
           console.error("User denied account access or there was an error:", error);
+          setError("Failed to connect to wallet. Please ensure MetaMask is installed and unlocked.");
         }
       } else {
-        console.log('Please install MetaMask!');
+        setError('Please install MetaMask to use this app');
       }
     };
 
@@ -501,12 +483,10 @@ function App() {
     };
   }, []);
 
-  // Form input handler
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
@@ -521,7 +501,6 @@ function App() {
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
-        setIsImageLoading(true);
         setGeneratedImage(response.data.imageUrl);
         
         // Create metadata
@@ -549,40 +528,13 @@ function App() {
       setError(error.response?.data?.error || error.message || 'An unknown error occurred');
     } finally {
       setIsGenerating(false);
-      setIsImageLoading(false);
       console.log('Generation process completed.');
     }
   };
 
-  // IPFS upload functions
-  const uploadToIPFS = async (metadata) => {
-    try {
-      const result = await client.add(JSON.stringify(metadata));
-      console.log('IPFS upload result:', result);
-      return `https://${projectId}.ipfs.infura-ipfs.io/ipfs/${result.path}`;
-    } catch (error) {
-      console.error('Error uploading to IPFS:', error);
-      throw error;
-    }
-  };
-
-  const uploadImageToIPFS = async (imageUrl) => {
-    try {
-      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-      const buffer = Buffer.from(response.data, 'binary');
-      const result = await client.add(buffer);
-      return `https://ipfs.io/ipfs/${result.path}`;
-    } catch (error) {
-      console.error('Error uploading image to IPFS:', error);
-      throw error;
-    }
-  };
-
-  // NFT minting function
   const mintNFT = async () => {
     if (!contract || !metadataUrl) {
-      console.error('Contract or metadata URL is not available');
-      alert('Unable to mint NFT. Please ensure you are connected and have generated an image.');
+      setError('Unable to mint NFT. Please ensure you are connected and have generated an image.');
       return;
     }
     try {
@@ -592,20 +544,16 @@ function App() {
       const receipt = await tx.wait();
       console.log('Transaction confirmed:', receipt.transactionHash);
       
-      // Fetch the token ID from the transaction receipt
       const transferEvent = receipt.logs.find(log => log.eventName === 'Transfer');
       const tokenId = transferEvent.args.tokenId;
       
-      // Fetch the token URI
       const tokenURI = await contract.tokenURI(tokenId);
       console.log('Token URI:', tokenURI);
       
-      // Fetch the metadata
       const response = await axios.get(tokenURI);
       const metadata = response.data;
       console.log('NFT Metadata:', metadata);
       
-      // Update the UI with the minted NFT image
       if (metadata.image) {
         setGeneratedImage(metadata.image);
       }
@@ -613,11 +561,10 @@ function App() {
       alert('NFT minted successfully!');
     } catch (error) {
       console.error('Error minting NFT:', error);
-      alert(`Failed to mint NFT: ${error.message}`);
+      setError(`Failed to mint NFT: ${error.message}`);
     }
   };
 
-  // Wallet connection function
   const connectWallet = async () => {
     if (provider) {
       try {
@@ -631,13 +578,13 @@ function App() {
         setPepeBalance(ethers.formatUnits(balance, 18));
       } catch (error) {
         console.error("Failed to connect wallet:", error);
+        setError("Failed to connect wallet. Please try again.");
       }
     } else {
-      console.log('Please install MetaMask!');
+      setError('Please install MetaMask to use this app');
     }
   };
 
-  // Render component
   return (
     <div className="App">
       <h1>Pepe NFT Generator</h1>
@@ -652,14 +599,15 @@ function App() {
         )}
       </div>
       <form onSubmit={handleSubmit}>
-        <input type="text" name="emotion" placeholder="Emotion" value={formData.emotion} onChange={handleInputChange} />
-        <input type="text" name="clothes" placeholder="Clothes" value={formData.clothes} onChange={handleInputChange} />
-        <input type="text" name="accessories" placeholder="Accessories" value={formData.accessories} onChange={handleInputChange} />
-        <input type="text" name="background" placeholder="Background" value={formData.background} onChange={handleInputChange} />
+        <input type="text" name="emotion" placeholder="Emotion" value={formData.emotion} onChange={handleInputChange} required />
+        <input type="text" name="clothes" placeholder="Clothes" value={formData.clothes} onChange={handleInputChange} required />
+        <input type="text" name="accessories" placeholder="Accessories" value={formData.accessories} onChange={handleInputChange} required />
+        <input type="text" name="background" placeholder="Background" value={formData.background} onChange={handleInputChange} required />
         <button type="submit" disabled={isGenerating}>
           {isGenerating ? 'Generating...' : 'Generate Pepe'}
         </button>
       </form>
+      {error && <p className="error">{error}</p>}
       {generatedImage && metadataUrl && (
         <div>
           <img src={generatedImage} alt="Generated Pepe" />
