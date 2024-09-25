@@ -4,6 +4,7 @@ const OpenAI = require('openai');
 require('dotenv').config();
 const axios = require('axios');
 const pinataSDK = require('@pinata/sdk');
+const { Readable } = require('stream');
 
 const app = express();
 app.use(cors());
@@ -14,8 +15,6 @@ const PORT = process.env.PORT || 3001;
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// IPFS configuration (using Pinata)
 
 const pinata = new pinataSDK({ 
   pinataApiKey: process.env.PINATA_API_KEY, 
@@ -41,10 +40,15 @@ app.post('/generate-image', async (req, res) => {
     const imageUrl = response.data[0].url;
     console.log('Generated image URL:', imageUrl);
     
-    // Upload the generated image to IPFS using Pinata
+    // Download the image
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const buffer = Buffer.from(imageResponse.data, 'binary');
-    const result = await pinata.pinFileToIPFS(buffer, {
+    const buffer = Buffer.from(imageResponse.data);
+
+    // Create a readable stream from the buffer
+    const stream = Readable.from(buffer);
+
+    // Upload the generated image to IPFS using Pinata
+    const result = await pinata.pinFileToIPFS(stream, {
       pinataMetadata: {
         name: `Pepe-NFT-${Date.now()}.png`
       }
