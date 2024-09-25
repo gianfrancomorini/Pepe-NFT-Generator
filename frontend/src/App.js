@@ -510,13 +510,18 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
+    setError(null);
     console.log('Starting image generation process...');
     try {
+      if (!formData.emotion || !formData.clothes || !formData.accessories || !formData.background) {
+        throw new Error('Please fill in all fields');
+      }
       console.log('Sending request to backend:', formData);
       const response = await axios.post('http://localhost:3001/generate-image', formData);
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
+        setIsImageLoading(true);
         const ipfsImageUrl = await uploadImageToIPFS(response.data.imageUrl);
         console.log('Image uploaded to IPFS:', ipfsImageUrl);
         setGeneratedImage(ipfsImageUrl);
@@ -539,12 +544,14 @@ function App() {
         console.log('Metadata uploaded, IPFS URL:', metadataResponse.data.metadataUrl);
         setMetadataUrl(metadataResponse.data.metadataUrl);
       } else {
-        console.error('No image URL in response');
+        throw new Error('No image URL in response');
       }
     } catch (error) {
       console.error('Error generating image or uploading metadata:', error);
+      setError(error.message || 'An error occurred during image generation');
     } finally {
       setIsGenerating(false);
+      setIsImageLoading(false);
       console.log('Generation process completed.');
     }
   };
