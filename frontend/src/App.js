@@ -522,15 +522,13 @@ function App() {
       
       if (response.data.imageUrl) {
         setIsImageLoading(true);
-        const ipfsImageUrl = await uploadImageToIPFS(response.data.imageUrl);
-        console.log('Image uploaded to IPFS:', ipfsImageUrl);
-        setGeneratedImage(ipfsImageUrl);
+        setGeneratedImage(response.data.imageUrl);
         
         // Create metadata
         const metadata = {
           name: `Pepe NFT #${Date.now()}`,
           description: "A unique Pepe NFT with custom attributes",
-          image: ipfsImageUrl,
+          image: response.data.imageUrl,
           attributes: [
             { trait_type: "Emotion", value: formData.emotion },
             { trait_type: "Clothes", value: formData.clothes },
@@ -548,7 +546,7 @@ function App() {
       }
     } catch (error) {
       console.error('Error generating image or uploading metadata:', error);
-      setError(error.message || 'An error occurred during image generation');
+      setError(error.response?.data?.error || error.message || 'An unknown error occurred');
     } finally {
       setIsGenerating(false);
       setIsImageLoading(false);
