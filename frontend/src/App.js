@@ -598,7 +598,7 @@ function App() {
   return (
     <div className="App">
   <img 
-  src="https://www.pepe.fans/_nuxt/pepe-smart.48929a39.png" 
+  src="frontend/public/pepe-smart.png" 
   alt="Pepe Smart" 
   style={{ width: '300px', height: 'auto' }} 
 />
