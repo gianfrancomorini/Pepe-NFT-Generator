@@ -432,6 +432,8 @@ const PEPE_ABI = [
   'function transfer(address recipient, uint256 amount) external returns (bool)'
 ];
 
+const API_BASE_URL = 'https://Pepe-NFT-Generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
+
 function App() {
   const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
   const [generatedImage, setGeneratedImage] = useState(null);
@@ -497,7 +499,7 @@ function App() {
         throw new Error('Please fill in all fields');
       }
       console.log('Sending request to backend:', formData);
-      const response = await axios.post('http://localhost:3001/generate-image', formData);
+      const response = await axios.post(`${API_BASE_URL}/generate-image`, formData);
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
