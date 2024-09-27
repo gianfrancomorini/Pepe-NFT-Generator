@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.pepe-image {
+  width: 300px;
+  height: auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}

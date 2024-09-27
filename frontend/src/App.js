@@ -568,19 +568,27 @@ function App() {
   };
 
   const connectWallet = async () => {
-    if (provider) {
+    if (typeof window.ethereum !== 'undefined') {
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(provider);
+  
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAccount(address);
-
+  
         const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
-        const balance = await pepeContract.balanceOf(address);
-        setPepeBalance(ethers.formatUnits(balance, 18));
+        try {
+          const balance = await pepeContract.balanceOf(address);
+          setPepeBalance(ethers.formatUnits(balance, 18));
+        } catch (balanceError) {
+          console.error("Error fetching PEPE balance:", balanceError);
+          setPepeBalance("Error fetching balance");
+        }
       } catch (error) {
         console.error("Failed to connect wallet:", error);
-        setError("Failed to connect wallet. Please try again.");
+        setError("Failed to connect wallet. Please ensure MetaMask is installed, unlocked, and connected to the correct network.");
       }
     } else {
       setError('Please install MetaMask to use this app');
@@ -589,6 +597,7 @@ function App() {
 
   return (
     <div className="App">
+    <img src="https://www.pepe.fans/_nuxt/pepe-smart.48929a39.png" alt="Pepe Smart" />
       <h1>Pepe NFT Generator</h1>
       <div className="wallet-info">
         {account ? (
