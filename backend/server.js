@@ -12,6 +12,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
+app.get('/', (req, res) => {
+  res.send('Pepe NFT Generator API is running!');
+});
+
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
