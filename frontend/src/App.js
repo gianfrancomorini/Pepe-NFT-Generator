@@ -597,7 +597,11 @@ function App() {
 
   return (
     <div className="App">
-    <img src="https://www.pepe.fans/_nuxt/pepe-smart.48929a39.png" alt="Pepe Smart" />
+  <img 
+  src="https://www.pepe.fans/_nuxt/pepe-smart.48929a39.png" 
+  alt="Pepe Smart" 
+  style={{ width: '300px', height: 'auto' }} 
+/>
       <h1>Pepe NFT Generator</h1>
       <div className="wallet-info">
         {account ? (
