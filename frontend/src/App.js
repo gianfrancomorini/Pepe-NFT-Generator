@@ -519,7 +519,7 @@ function App() {
         };
     
         console.log('Uploading metadata to IPFS:', metadata);
-        const metadataResponse = await axios.post('http://localhost:3001/upload-metadata', metadata);
+        const metadataResponse = await axios.post(`${API_BASE_URL}/upload-metadata`, metadata);
         console.log('Metadata uploaded, IPFS URL:', metadataResponse.data.metadataUrl);
         setMetadataUrl(metadataResponse.data.metadataUrl);
       } else {
@@ -527,7 +527,7 @@ function App() {
       }
     } catch (error) {
       console.error('Error generating image or uploading metadata:', error);
-      setError(error.response?.data?.error || error.message || 'An unknown error occurred');
+      setError(error.response?.data?.error || error.message || 'An error occurred while generating the image or uploading metadata. Please try again.');
     } finally {
       setIsGenerating(false);
       console.log('Generation process completed.');

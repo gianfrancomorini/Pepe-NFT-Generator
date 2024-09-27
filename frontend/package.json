@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://gianfrancomorini.github.io/pepe-nft-generator",
+  "homepage": "https://gianfrancomorini.github.io/Pepe-NFT-Generator/",
   
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
