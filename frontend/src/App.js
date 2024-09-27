@@ -598,9 +598,9 @@ function App() {
   return (
     <div className="App">
   <img 
-  src=".frontend/public/pepe-smart.png" 
+  src="frontend/public/pepe-smart.png" 
   alt="Pepe Smart" 
-  style={{ width: '300px', height: 'auto' }} 
+  style={{ width: '300px', height: '300' }} 
 />
       <h1>Pepe NFT Generator</h1>
       <div className="wallet-info">
