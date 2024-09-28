@@ -499,7 +499,7 @@ function App() {
         throw new Error('Please fill in all fields');
       }
       console.log('Sending request to backend:', formData);
-      const response = await axios.post(`${API_BASE_URL}/generate-image`, formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate-image`, formData);
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
