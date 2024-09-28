@@ -9,7 +9,7 @@ const { Readable } = require('stream');
 const app = express();
 app.use(cors({
   origin: ['https://gianfrancomorini.github.io', 'http://localhost:3000'],
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
