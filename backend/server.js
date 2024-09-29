@@ -8,7 +8,7 @@ const { Readable } = require('stream');
 
 const app = express();
 app.use(cors({
-  origin: ['https://gianfrancomorini.github.io', 'http://localhost:3000'],
+  origin: ['https://gianfrancomorini.github.io/Pepe-NFT-Generator/', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
