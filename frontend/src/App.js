@@ -499,7 +499,7 @@ function App() {
         throw new Error('Please fill in all fields');
       }
       console.log('Sending request to backend:', formData);
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate-image`, formData);
+      const response = await axios.post('https://Pepe-NFT-Generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com', formData);
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
