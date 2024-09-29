@@ -4,6 +4,9 @@
 # Ignore the .env file in the "backend" directory
 backend/.env
 
+# Ignore the .env file in the "frontend/src" directory
+frontend/src/.env
+
 # Ignore the .env file in the "pepe-nft-contracts" directory
 pepe-nft-contracts/.env
 
