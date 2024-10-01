@@ -7,14 +7,26 @@ const pinataSDK = require('@pinata/sdk');
 const { Readable } = require('stream');
 
 const app = express();
+
 app.use(cors({
   origin: ['https://gianfrancomorini.github.io', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
+
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Basic health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('Healthy');
+});
 
 app.get('/', (req, res) => {
   res.send('Pepe NFT Generator API is running!');
@@ -30,10 +42,22 @@ const pinata = new pinataSDK({
   pinataSecretApiKey: process.env.PINATA_API_SECRET 
 });
 
+
+// Test endpoint
+app.post('/test', (req, res) => {
+  console.log('Test endpoint reached');
+  console.log('Request body:', req.body);
+  res.json({ 
+    message: 'Test endpoint working',
+    receivedData: req.body
+  });
+});
+
 app.post('/generate-image', async (req, res) => {
+  console.log('Received generate-image request');
   try {
     const { emotion, clothes, accessories, background } = req.body;
-    console.log('Received request:', { emotion, clothes, accessories, background });
+    console.log('Request body:', req.body);
 
     const prompt = `A cartoon frog with ${emotion} expression, wearing ${clothes} and ${accessories}, in a ${background} setting.`;
     console.log('Generated prompt:', prompt);
