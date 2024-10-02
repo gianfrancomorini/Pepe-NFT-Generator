@@ -499,7 +499,18 @@ function App() {
         throw new Error('Please fill in all fields');
       }
       console.log('Sending request to backend:', formData);
-      const response = await axios.post('https://Pepe-NFT-Generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com/generate-image', formData);
+      
+      const response = await axios.post(
+        'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com/generate-image', 
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true
+        }
+      );
+      
       console.log('Received response from backend:', response.data);
       
       if (response.data.imageUrl) {
@@ -519,7 +530,16 @@ function App() {
         };
     
         console.log('Uploading metadata to IPFS:', metadata);
-        const metadataResponse = await axios.post(`${API_BASE_URL}/upload-metadata`, metadata);
+        const metadataResponse = await axios.post(
+          `${API_BASE_URL}/upload-metadata`, 
+          metadata,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true
+          }
+        );
         console.log('Metadata uploaded, IPFS URL:', metadataResponse.data.metadataUrl);
         setMetadataUrl(metadataResponse.data.metadataUrl);
       } else {
