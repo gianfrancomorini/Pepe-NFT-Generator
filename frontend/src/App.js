@@ -500,16 +500,14 @@ function App() {
       }
       console.log('Sending request to backend:', formData);
       
-      const response = await axios.post(
-        'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com/generate-image', 
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true
+      const response = await axios({
+        method: 'post',
+        url: 'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com/generate-image',
+        data: formData,
+        headers: {
+          'Content-Type': 'application/json'
         }
-      );
+      });
       
       console.log('Received response from backend:', response.data);
       
