@@ -10,31 +10,34 @@ const app = express();
 
 // Update CORS configuration
 const corsOptions = {
-  origin: '*', // Allow all origins for testing
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'https://gianfrancomorini.github.io', // Specify your GitHub Pages domain
+  methods: ['GET', 'POST', 'OPTIONS'],          // Specify exact methods needed
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
-
-// Add options middleware for preflight requests
-app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080; // Match the port you specified in your logs
 
-// Initialize OpenAI and Pinata clients
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const pinata = new pinataSDK({ 
-  pinataApiKey: process.env.PINATA_API_KEY, 
-  pinataSecretApiKey: process.env.PINATA_API_SECRET 
-});
+// Initialize OpenAI and Pinata clients with error handling
+let openai;
+let pinata;
+try {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  pinata = new pinataSDK({ 
+    pinataApiKey: process.env.PINATA_API_KEY, 
+    pinataSecretApiKey: process.env.PINATA_API_SECRET 
+  });
+} catch (error) {
+  console.error('Error initializing API clients:', error);
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -43,11 +46,15 @@ app.get('/health', (req, res) => {
 
 // Generate image endpoint
 app.post('/generate-image', async (req, res) => {
-  console.log('Received generate-image request');
+  console.log('Received generate-image request:', req.body);
   try {
     const { emotion, clothes, accessories, background } = req.body;
     if (!emotion || !clothes || !accessories || !background) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    if (!openai || !pinata) {
+      throw new Error('API clients not properly initialized');
     }
 
     const prompt = `A cartoon frog with ${emotion} expression, wearing ${clothes} and ${accessories}, in a ${background} setting.`;
@@ -60,6 +67,7 @@ app.post('/generate-image', async (req, res) => {
     });
 
     const imageUrl = response.data[0].url;
+    console.log('Generated image URL:', imageUrl);
     
     // Download and upload to IPFS
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
@@ -72,6 +80,7 @@ app.post('/generate-image', async (req, res) => {
       }
     });
     const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+    console.log('IPFS URL:', ipfsUrl);
     
     res.json({ imageUrl: ipfsUrl });
   } catch (error) {
@@ -86,6 +95,10 @@ app.post('/generate-image', async (req, res) => {
 // Upload metadata endpoint
 app.post('/upload-metadata', async (req, res) => {
   try {
+    if (!pinata) {
+      throw new Error('Pinata client not properly initialized');
+    }
+
     const metadata = req.body;
     const result = await pinata.pinJSONToIPFS(metadata);
     const metadataUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
