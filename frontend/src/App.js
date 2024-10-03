@@ -432,8 +432,9 @@ const PEPE_ABI = [
   'function transfer(address recipient, uint256 amount) external returns (bool)'
 ];
 
-// Update this to match your actual backend URL
-const API_BASE_URL = 'http://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
+
+// Update API_BASE_URL to use HTTPS
+const API_BASE_URL = 'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
 
 function App() {
   const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
