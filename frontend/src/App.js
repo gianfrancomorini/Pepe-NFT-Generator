@@ -432,7 +432,8 @@ const PEPE_ABI = [
   'function transfer(address recipient, uint256 amount) external returns (bool)'
 ];
 
-const API_BASE_URL = 'https://Pepe-NFT-Generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
+// Update this to match your actual backend URL
+const API_BASE_URL = 'http://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
 
 function App() {
   const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
@@ -494,61 +495,55 @@ function App() {
     setIsGenerating(true);
     setError(null);
     console.log('Starting image generation process...');
+    
     try {
       if (!formData.emotion || !formData.clothes || !formData.accessories || !formData.background) {
         throw new Error('Please fill in all fields');
       }
-      console.log('Sending request to backend:', formData);
       
-      const response = await axios({
-        method: 'post',
-        url: 'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com/generate-image',
-        data: formData,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Received response from backend:', response.data);
-      
-      if (response.data.imageUrl) {
-        setGeneratedImage(response.data.imageUrl);
-        
-        // Create metadata
-        const metadata = {
-          name: `Pepe NFT #${Date.now()}`,
-          description: "A unique Pepe NFT with custom attributes",
-          image: response.data.imageUrl,
-          attributes: [
-            { trait_type: "Emotion", value: formData.emotion },
-            { trait_type: "Clothes", value: formData.clothes },
-            { trait_type: "Accessories", value: formData.accessories },
-            { trait_type: "Background", value: formData.background }
-          ]
-        };
-    
-        console.log('Uploading metadata to IPFS:', metadata);
-        const metadataResponse = await axios.post(
-          `${API_BASE_URL}/upload-metadata`, 
-          metadata,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            withCredentials: true
+      // Generate image
+      const imageResponse = await axios.post(
+        `${API_BASE_URL}/generate-image`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
           }
-        );
-        console.log('Metadata uploaded, IPFS URL:', metadataResponse.data.metadataUrl);
-        setMetadataUrl(metadataResponse.data.metadataUrl);
-      } else {
-        throw new Error('No image URL in response');
-      }
+        }
+      );
+      
+      const imageUrl = imageResponse.data.imageUrl;
+      setGeneratedImage(imageUrl);
+      
+      // Create and upload metadata
+      const metadata = {
+        name: `Pepe NFT #${Date.now()}`,
+        description: "A unique Pepe NFT with custom attributes",
+        image: imageUrl,
+        attributes: [
+          { trait_type: "Emotion", value: formData.emotion },
+          { trait_type: "Clothes", value: formData.clothes },
+          { trait_type: "Accessories", value: formData.accessories },
+          { trait_type: "Background", value: formData.background }
+        ]
+      };
+  
+      const metadataResponse = await axios.post(
+        `${API_BASE_URL}/upload-metadata`,
+        metadata,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      setMetadataUrl(metadataResponse.data.metadataUrl);
     } catch (error) {
-      console.error('Error generating image or uploading metadata:', error);
-      setError(error.response?.data?.error || error.message || 'An error occurred while generating the image or uploading metadata. Please try again.');
+      console.error('Error:', error);
+      setError(error.response?.data?.error || error.message || 'An error occurred. Please try again.');
     } finally {
       setIsGenerating(false);
-      console.log('Generation process completed.');
     }
   };
 
@@ -558,26 +553,8 @@ function App() {
       return;
     }
     try {
-      console.log('Minting NFT with metadata URL:', metadataUrl);
       const tx = await contract.mintNFT(account, metadataUrl);
-      console.log('Transaction sent:', tx.hash);
-      const receipt = await tx.wait();
-      console.log('Transaction confirmed:', receipt.transactionHash);
-      
-      const transferEvent = receipt.logs.find(log => log.eventName === 'Transfer');
-      const tokenId = transferEvent.args.tokenId;
-      
-      const tokenURI = await contract.tokenURI(tokenId);
-      console.log('Token URI:', tokenURI);
-      
-      const response = await axios.get(tokenURI);
-      const metadata = response.data;
-      console.log('NFT Metadata:', metadata);
-      
-      if (metadata.image) {
-        setGeneratedImage(metadata.image);
-      }
-      
+      await tx.wait();
       alert('NFT minted successfully!');
     } catch (error) {
       console.error('Error minting NFT:', error);
@@ -585,41 +562,13 @@ function App() {
     }
   };
 
-  const connectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        setProvider(provider);
-  
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
-  
-        const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
-        try {
-          const balance = await pepeContract.balanceOf(address);
-          setPepeBalance(ethers.formatUnits(balance, 18));
-        } catch (balanceError) {
-          console.error("Error fetching PEPE balance:", balanceError);
-          setPepeBalance("Error fetching balance");
-        }
-      } catch (error) {
-        console.error("Failed to connect wallet:", error);
-        setError("Failed to connect wallet. Please ensure MetaMask is installed, unlocked, and connected to the correct network.");
-      }
-    } else {
-      setError('Please install MetaMask to use this app');
-    }
-  };
-
   return (
     <div className="App">
-  <img 
-  src="/Pepe-NFT-Generator/pepe-smart.png" 
-  alt="Pepe Smart" 
-  style={{ width: '300px', height: '300' }} 
-/>
+      <img 
+        src="/Pepe-NFT-Generator/pepe-smart.png" 
+        alt="Pepe Smart" 
+        style={{ width: '300px', height: '300px' }} 
+      />
       <h1>Pepe NFT Generator</h1>
       <div className="wallet-info">
         {account ? (
@@ -628,7 +577,9 @@ function App() {
             <p>PEPE Balance: {pepeBalance ? `${pepeBalance} PEPE` : 'Loading...'}</p>
           </div>
         ) : (
-          <button onClick={connectWallet}>Connect Wallet</button>
+          <button onClick={() => window.ethereum.request({ method: 'eth_requestAccounts' })}>
+            Connect Wallet
+          </button>
         )}
       </div>
       <form onSubmit={handleSubmit}>
@@ -643,7 +594,7 @@ function App() {
       {error && <p className="error">{error}</p>}
       {generatedImage && metadataUrl && (
         <div>
-          <img src={generatedImage} alt="Generated Pepe" />
+          <img src={generatedImage} alt="Generated Pepe" style={{ maxWidth: '400px' }} />
           <button onClick={mintNFT}>Mint NFT</button>
         </div>
       )}
