@@ -9,22 +9,18 @@ const { Readable } = require('stream');
 const app = express();
 
 // Update CORS configuration
-const corsOptions = {
-  origin: 'https://gianfrancomorini.github.io', // Specify your GitHub Pages domain
-  methods: ['GET', 'POST', 'OPTIONS'],          // Specify exact methods needed
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: 'https://gianfrancomorini.github.io',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false  // Changed to false since we don't need credentials
+}));
 
 app.use(express.json());
 
-const PORT = process.env.PORT || 8080; // Match the port you specified in your logs
+const PORT = process.env.PORT || 8080;
 
-// Initialize OpenAI and Pinata clients with error handling
+// Initialize OpenAI and Pinata clients
 let openai;
 let pinata;
 try {
@@ -47,8 +43,10 @@ app.get('/health', (req, res) => {
 // Generate image endpoint
 app.post('/generate-image', async (req, res) => {
   console.log('Received generate-image request:', req.body);
+  
   try {
     const { emotion, clothes, accessories, background } = req.body;
+    
     if (!emotion || !clothes || !accessories || !background) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -79,6 +77,7 @@ app.post('/generate-image', async (req, res) => {
         name: `Pepe-NFT-${Date.now()}.png`
       }
     });
+    
     const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
     console.log('IPFS URL:', ipfsUrl);
     
