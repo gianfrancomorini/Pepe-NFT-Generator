@@ -434,7 +434,7 @@ const PEPE_ABI = [
 
 
 // Update API_BASE_URL to use HTTPS
-const API_BASE_URL = 'https://pepe-nft-generator.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
+const API_BASE_URL = 'http://Pepe-NFT-Generator.us-west-1.elasticbeanstalk.com/generate-image';
 
 function App() {
   const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
