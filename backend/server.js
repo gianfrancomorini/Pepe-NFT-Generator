@@ -10,11 +10,17 @@ const app = express();
 
 // Update CORS configuration
 app.use(cors({
-  origin: 'https://gianfrancomorini.github.io',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: false  // Changed to false since we don't need credentials
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Add a test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
 
 app.use(express.json());
 
