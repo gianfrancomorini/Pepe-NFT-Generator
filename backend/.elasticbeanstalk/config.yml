@@ -1,19 +1,21 @@
 branch-defaults:
   default:
-    environment: Pepe-NFT-Generator
+    environment: null
 environment-defaults:
   Pepe-NFT-Generator:
     branch: null
     repository: null
 global:
   application_name: Pepe-NFT-Generator
+  branch: null
   default_ec2_keyname: null
-  default_platform: Node.js 20 running on 64bit Amazon Linux 2023
+  default_platform: Node.js 20
   default_region: us-west-1
   include_git_submodules: true
   instance_profile: null
   platform_name: null
   platform_version: null
   profile: null
+  repository: null
   sc: null
   workspace_type: Application
