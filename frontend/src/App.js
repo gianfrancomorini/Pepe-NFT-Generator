@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 
-// Contract ABI and addresses
+// Contract configurations
 const contractABI = [
     {
       "inputs": [],
@@ -423,7 +423,7 @@ const contractABI = [
       "stateMutability": "view",
       "type": "function",
       "constant": true
-    }]; // ABI truncated for brevity
+    }]; // Your existing ABI
 const contractAddress = "0x53D99642Ea46039c2AB681cabd4B7Df7CD87DE19";
 
 const PEPE_CONTRACT_ADDRESS = '0x6982508145454ce325ddbe47a25d4ec3d2311933';
@@ -432,12 +432,17 @@ const PEPE_ABI = [
   'function transfer(address recipient, uint256 amount) external returns (bool)'
 ];
 
-
-// Update API_BASE_URL to use HTTPS
-const API_BASE_URL = 'http://Pepe-NFT-Generator.us-west-1.elasticbeanstalk.com';
+// API URL configuration
+const API_URL = process.env.REACT_APP_API_URL || 'https://pepe-nft-generator.us-west-1.elasticbeanstalk.com';
 
 function App() {
-  const [formData, setFormData] = useState({ emotion: '', clothes: '', accessories: '', background: '' });
+  // State declarations
+  const [formData, setFormData] = useState({
+    emotion: '',
+    clothes: '',
+    accessories: '',
+    background: ''
+  });
   const [generatedImage, setGeneratedImage] = useState(null);
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
@@ -465,10 +470,6 @@ function App() {
           const pepeContract = new ethers.Contract(PEPE_CONTRACT_ADDRESS, PEPE_ABI, signer);
           const balance = await pepeContract.balanceOf(address);
           setPepeBalance(ethers.formatUnits(balance, 18));
-
-          window.ethereum.on('accountsChanged', (accounts) => {
-            setAccount(accounts[0]);
-          });
         } catch (error) {
           console.error("User denied account access or there was an error:", error);
           setError("Failed to connect to wallet. Please ensure MetaMask is installed and unlocked.");
@@ -480,9 +481,17 @@ function App() {
 
     initEthers();
 
+    const handleAccountsChanged = (accounts) => {
+      setAccount(accounts[0]);
+    };
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+    }
+
     return () => {
       if (window.ethereum && window.ethereum.removeListener) {
-        window.ethereum.removeListener('accountsChanged', setAccount);
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       }
     };
   }, []);
@@ -495,21 +504,23 @@ function App() {
     e.preventDefault();
     setIsGenerating(true);
     setError(null);
-    console.log('Starting image generation process...');
     
     try {
-      if (!formData.emotion || !formData.clothes || !formData.accessories || !formData.background) {
-        throw new Error('Please fill in all fields');
+      // Validate form data
+      const missingFields = Object.entries(formData)
+        .filter(([_, value]) => !value.trim())
+        .map(([key]) => key);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Please fill in: ${missingFields.join(', ')}`);
       }
       
       // Generate image
       const imageResponse = await axios.post(
-        `${API_BASE_URL}/generate-image`,
+        `${API_URL}/generate-image`,
         formData,
         {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         }
       );
       
@@ -521,28 +532,24 @@ function App() {
         name: `Pepe NFT #${Date.now()}`,
         description: "A unique Pepe NFT with custom attributes",
         image: imageUrl,
-        attributes: [
-          { trait_type: "Emotion", value: formData.emotion },
-          { trait_type: "Clothes", value: formData.clothes },
-          { trait_type: "Accessories", value: formData.accessories },
-          { trait_type: "Background", value: formData.background }
-        ]
+        attributes: Object.entries(formData).map(([trait_type, value]) => ({
+          trait_type,
+          value
+        }))
       };
   
       const metadataResponse = await axios.post(
-        `${API_BASE_URL}/upload-metadata`,
+        `${API_URL}/upload-metadata`,
         metadata,
         {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         }
       );
       
       setMetadataUrl(metadataResponse.data.metadataUrl);
     } catch (error) {
       console.error('Error:', error);
-      setError(error.response?.data?.error || error.message || 'An error occurred. Please try again.');
+      setError(error.response?.data?.error || error.message || 'An error occurred');
     } finally {
       setIsGenerating(false);
     }
@@ -571,6 +578,7 @@ function App() {
         style={{ width: '300px', height: '300px' }} 
       />
       <h1>Pepe NFT Generator</h1>
+      
       <div className="wallet-info">
         {account ? (
           <div>
@@ -583,16 +591,26 @@ function App() {
           </button>
         )}
       </div>
+      
       <form onSubmit={handleSubmit}>
-        <input type="text" name="emotion" placeholder="Emotion" value={formData.emotion} onChange={handleInputChange} required />
-        <input type="text" name="clothes" placeholder="Clothes" value={formData.clothes} onChange={handleInputChange} required />
-        <input type="text" name="accessories" placeholder="Accessories" value={formData.accessories} onChange={handleInputChange} required />
-        <input type="text" name="background" placeholder="Background" value={formData.background} onChange={handleInputChange} required />
+        {['emotion', 'clothes', 'accessories', 'background'].map(field => (
+          <input
+            key={field}
+            type="text"
+            name={field}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            value={formData[field]}
+            onChange={handleInputChange}
+            required
+          />
+        ))}
         <button type="submit" disabled={isGenerating}>
           {isGenerating ? 'Generating...' : 'Generate Pepe'}
         </button>
       </form>
+      
       {error && <p className="error">{error}</p>}
+      
       {generatedImage && metadataUrl && (
         <div>
           <img src={generatedImage} alt="Generated Pepe" style={{ maxWidth: '400px' }} />
