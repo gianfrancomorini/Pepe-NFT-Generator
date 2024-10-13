@@ -433,7 +433,7 @@ const PEPE_ABI = [
 ];
 
 // API URL configuration
-const API_URL = process.env.REACT_APP_API_URL || 'https://pepe-nft-generator.us-west-1.elasticbeanstalk.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://pepenftgenerator.xyz';
 
 function App() {
   // State declarations
