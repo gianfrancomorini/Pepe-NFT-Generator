@@ -10,7 +10,7 @@ const app = express();
 
 // Update CORS configuration
 app.use(cors({
-  origin: 'https://gianfrancomorini.github.io',
+  origin: ['https://gianfrancomorini.github.io', 'https://pepenftgenerator.xyz'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
