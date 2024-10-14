@@ -10,6 +10,9 @@ const helmet = require('helmet');
 
 const app = express();
 
+// Trust proxy
+app.set('trust proxy', 1);
+
 // Enhanced security headers
 app.use(helmet());
 
