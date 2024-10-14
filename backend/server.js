@@ -5,8 +5,20 @@ require('dotenv').config();
 const axios = require('axios');
 const pinataSDK = require('@pinata/sdk');
 const { Readable } = require('stream');
+const rateLimit = require("express-rate-limit");
+const helmet = require('helmet');
 
 const app = express();
+
+// Enhanced security headers
+app.use(helmet());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Update CORS configuration
 app.use(cors({
@@ -15,11 +27,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-
-// Add a test route
-app.get('/test', (req, res) => {
-  res.json({ message: 'Server is running!' });
-});
 
 app.use(express.json());
 
@@ -114,6 +121,12 @@ app.post('/upload-metadata', async (req, res) => {
       details: error.message 
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 app.listen(PORT, () => {
