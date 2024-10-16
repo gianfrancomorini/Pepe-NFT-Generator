@@ -1,8 +1,12 @@
 branch-defaults:
   default:
     environment: pepe-nft-env-new
+environment-defaults:
+  pepe-nft-env-new:
+    branch: null
+    repository: null
 global:
-  application_name: Pepe-NFT-Generator
+  application_name: pepe-nft-generator
   branch: null
   default_ec2_keyname: null
   default_platform: Node.js 20
