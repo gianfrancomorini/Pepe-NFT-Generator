@@ -517,7 +517,7 @@ function App() {
       
       // Generate image
       const imageResponse = await axios.post(
-        `${API_URL}/generate-image`,
+        `${API_URL}/api/generate-image`,
         formData,
         {
           headers: { 'Content-Type': 'application/json' }
