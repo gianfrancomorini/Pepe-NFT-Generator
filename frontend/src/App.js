@@ -578,6 +578,9 @@ function App() {
         style={{ width: '300px', height: '300px' }} 
       />
       <h1>Pepe NFT Generator</h1>
+      <h5>1- Connect your Metamask Wallet on Ethereum Mainet</h5>
+      <h5>2- App will display your PEPE 0x69 balance </h5>
+      <h5>3- To mint an NFT, switch to Sepolia Testnet. Fill the desired fields and click "Generate Pepe". </h5>
       
       <div className="wallet-info">
         {account ? (
