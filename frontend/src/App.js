@@ -433,7 +433,7 @@ const PEPE_ABI = [
 ];
 
 // API URL configuration
-const API_URL = process.env.REACT_APP_API_URL || 'http://pepe-nft-env-new-v3.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://pepe-nft-env-new-v3.eba-eas8bwd2.us-west-1.elasticbeanstalk.com';
 
 function App() {
   // State declarations
@@ -578,7 +578,7 @@ function App() {
         style={{ width: '300px', height: '300px' }} 
       />
       <h1>Pepe NFT Generator</h1>
-      <h5>1- Connect your Metamask Wallet on Ethereum Mainet</h5>
+      <h5>1- Connect your Metamask Wallet on Ethereum Mainnet</h5>
       <h5>2- App will display your PEPE 0x69 balance </h5>
       <h5>3- To mint an NFT, switch to Sepolia Testnet. Fill the desired fields and click "Generate Pepe". </h5>
       
