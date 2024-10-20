@@ -24,11 +24,11 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
+app.use('/api/', limiter); // Apply rate limiting only to API routes
 
 // Update CORS configuration
 app.use(cors({
-  origin: ['https://gianfrancomorini.github.io', 'https://pepenftgenerator.xyz'],
+  origin: ['https://gianfrancomorini.github.io', 'https://pepenftgenerator.xyz', 'http://pepenftgenerator.xyz'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
