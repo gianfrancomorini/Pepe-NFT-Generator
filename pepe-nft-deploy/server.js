@@ -28,7 +28,7 @@ app.use('/api/', limiter); // Apply rate limiting only to API routes
 
 // Update CORS configuration
 app.use(cors({
-  origin: ['https://gianfrancomorini.github.io', 'https://pepenftgenerator.xyz', 'http://pepenftgenerator.xyz'],
+  origin: ['https://pepenftgenerator.xyz', 'http://pepenftgenerator.xyz', 'http://www.pepenftgenerator.xyz', 'https://www.pepenftgenerator.xyz'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
