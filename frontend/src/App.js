@@ -433,7 +433,7 @@ const PEPE_ABI = [
 ];
 
 // API URL configuration
-const API_URL = process.env.REACT_APP_API_URL || 'https://www.pepenftgenerator.xyz/api';
+const API_URL = '/api';
 
 function App() {
   // State declarations
