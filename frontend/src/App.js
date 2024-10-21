@@ -433,7 +433,7 @@ const PEPE_ABI = [
 ];
 
 // API URL configuration
-const API_URL = '/api';
+const API_URL = 'https://www.pepenftgenerator.xyz/api';
 
 function App() {
   // State declarations
@@ -517,7 +517,7 @@ function App() {
       
       // Generate image
       const imageResponse = await axios.post(
-        `${API_URL}/api/generate-image`,
+        `${API_URL}/generate-image`,
         formData,
         {
           headers: { 'Content-Type': 'application/json' }
