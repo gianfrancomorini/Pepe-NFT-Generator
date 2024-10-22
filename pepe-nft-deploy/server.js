@@ -11,34 +11,57 @@ const path = require('path');
 
 const app = express();
 
-// Trust proxy
+// Trust proxy - important for Elastic Beanstalk
 app.set('trust proxy', 1);
 
-// Enhanced security headers
+// Enhanced security headers with adjustments for Elastic Beanstalk
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP as it might interfere with your React app
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https:", "http:"],
+      fontSrc: ["'self'", "data:", "https:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false,
 }));
 
-// Rate limiting
+// Rate limiting configuration
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting for health checks
+  skip: (req) => req.path === '/api/health'
 });
-app.use('/api/', limiter); // Apply rate limiting only to API routes
 
-// Update CORS configuration
-app.use(cors({
-  origin: 'https://www.pepenftgenerator.xyz',
+// Apply rate limiting only to API routes
+app.use('/api/', limiter);
+
+// CORS configuration - adjusted for Elastic Beanstalk
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://www.pepenftgenerator.xyz', 'https://pepenftgenerator.xyz']
+    : true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}));
+};
+app.use(cors(corsOptions));
 
-app.use(express.json());
+// Increased payload limit for image processing
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-const PORT = process.env.PORT || 8080;
-
-// Initialize OpenAI and Pinata clients
+// Initialize API clients
 let openai;
 let pinata;
 try {
@@ -54,14 +77,20 @@ try {
 }
 
 // Serve static files from the React app build directory
+// Important: This should come AFTER security middleware but BEFORE API routes
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Health check endpoint
+// Health check endpoint - useful for Elastic Beanstalk
 app.get('/api/health', (req, res) => {
-  res.status(200).send('Healthy');
+  const health = {
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    status: 'OK'
+  };
+  res.status(200).json(health);
 });
 
-// Generate image endpoint
+// Your existing API endpoints remain the same
 app.post('/api/generate-image', async (req, res) => {
   console.log('Received generate-image request:', req.body);
   
@@ -88,7 +117,6 @@ app.post('/api/generate-image', async (req, res) => {
     const imageUrl = response.data[0].url;
     console.log('Generated image URL:', imageUrl);
     
-    // Download and upload to IPFS
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(imageResponse.data);
     const stream = Readable.from(buffer);
@@ -112,7 +140,6 @@ app.post('/api/generate-image', async (req, res) => {
   }
 });
 
-// Upload metadata endpoint
 app.post('/api/upload-metadata', async (req, res) => {
   try {
     if (!pinata) {
@@ -132,24 +159,29 @@ app.post('/api/upload-metadata', async (req, res) => {
   }
 });
 
-// Catch-all handler for any request that doesn't match the ones above
+// Catch-all handler for React router - must come AFTER API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Error handling middleware
+// Enhanced error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    method: req.method
+  });
+  
   res.status(500).json({ 
     error: 'Internal Server Error', 
-    details: err.message 
+    details: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message
   });
 });
 
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-app.get('/api/health', (req, res) => {
-  res.status(200).send('Healthy');
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
