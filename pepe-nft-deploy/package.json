@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "server.js",
   "engines": {
-    "node": "20.x",
-    "npm": "10.x"
+    "node": "20.9.0",
+    "npm": "10.2.3"
   },
   "scripts": {
     "start": "node server.js",
-    "build": "react-scripts build",
+    "build": "node --max_old_space_size=4096 ./node_modules/.bin/react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
