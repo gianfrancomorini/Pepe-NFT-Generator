@@ -1,16 +1,17 @@
 {
-  "name": "pepe-nft-generator-backend",
+  "name": "pepe-nft-generator",
   "version": "1.0.0",
   "main": "server.js",
   "engines": {
-    "node": "22.10.0",
+    "node": "20.x",
     "npm": "10.9.0"
   },
   "scripts": {
     "start": "node server.js",
-    "build": "node --max_old_space_size=4096 ./node_modules/.bin/react-scripts build",
+    "build": "cd client && npm install && npm run build && mv build ../",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "install-client": "cd build && npm install",
+    "install-server": "npm install"
   },
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
@@ -20,9 +21,9 @@
     "express": "^4.18.2",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
-    "openai": "^4.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "^5.0.1"
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
