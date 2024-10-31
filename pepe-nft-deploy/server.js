@@ -1,29 +1,29 @@
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
-require('dotenv').config();
 const axios = require('axios');
 const pinataSDK = require('@pinata/sdk');
 const { Readable } = require('stream');
 const rateLimit = require("express-rate-limit");
 const helmet = require('helmet');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 
-// Trust proxy - important for Elastic Beanstalk
-app.set('trust proxy', 1);
+// Trust proxy - required for EB ALB
+app.set('trust proxy', true);
 
-// Enhanced security headers with adjustments for Elastic Beanstalk
+// Helmet configuration adjusted for EB
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https:", "http:"],
-      fontSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https:", "http:", "wss:", "ws:"],
+      fontSrc: ["'self'", "data:", "https:", "http:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'self'"],
@@ -31,64 +31,86 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
 }));
 
-// Rate limiting configuration
+// Rate limiting - adjusted for EB
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting for health checks
-  skip: (req) => req.path === '/api/health'
+  skip: (req) => req.path === '/api/health',
+  trusted: true // Required for EB proxy setup
 });
 
-// Apply rate limiting only to API routes
+// API rate limiting
 app.use('/api/', limiter);
 
-// CORS configuration - adjusted for Elastic Beanstalk
+// CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://www.pepenftgenerator.xyz', 'https://pepenftgenerator.xyz']
     : true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  maxAge: 86400 // CORS preflight cache - 24 hours
 };
 app.use(cors(corsOptions));
 
-// Increased payload limit for image processing
+// Body parser config
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Initialize API clients
+// Initialize API clients with error handling
 let openai;
 let pinata;
-try {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  pinata = new pinataSDK({ 
-    pinataApiKey: process.env.PINATA_API_KEY, 
-    pinataSecretApiKey: process.env.PINATA_API_SECRET 
-  });
-} catch (error) {
-  console.error('Error initializing API clients:', error);
+
+function initializeAPIClients() {
+  try {
+    if (process.env.OPENAI_API_KEY) {
+      openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    } else {
+      console.warn('OPENAI_API_KEY not found in environment variables');
+    }
+
+    if (process.env.PINATA_API_KEY && process.env.PINATA_API_SECRET) {
+      pinata = new pinataSDK({ 
+        pinataApiKey: process.env.PINATA_API_KEY, 
+        pinataSecretApiKey: process.env.PINATA_API_SECRET 
+      });
+    } else {
+      console.warn('Pinata credentials not found in environment variables');
+    }
+  } catch (error) {
+    console.error('Error initializing API clients:', error);
+  }
 }
 
-// Serve static files from the React app build directory
-// Important: This should come AFTER security middleware but BEFORE API routes
+initializeAPIClients();
+
+// Serve static files - must come before API routes
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Health check endpoint - useful for Elastic Beanstalk
+// Enhanced health check for EB
 app.get('/api/health', (req, res) => {
   const health = {
     uptime: process.uptime(),
     timestamp: Date.now(),
-    status: 'OK'
+    status: 'OK',
+    memory: process.memoryUsage(),
+    environment: process.env.NODE_ENV,
+    serviceStatus: {
+      openai: !!openai,
+      pinata: !!pinata
+    }
   };
   res.status(200).json(health);
 });
+
 
 // Your existing API endpoints remain the same
 app.post('/api/generate-image', async (req, res) => {
@@ -159,29 +181,45 @@ app.post('/api/upload-metadata', async (req, res) => {
   }
 });
 
-// Catch-all handler for React router - must come AFTER API routes
+// Catch-all handler for React router
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Enhanced error handling middleware
+// Enhanced error handling
 app.use((err, req, res, next) => {
+  const errorResponse = {
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal Server Error' 
+      : err.message,
+    status: err.status || 500,
+    timestamp: new Date().toISOString()
+  };
+
+  // Log error details
   console.error('Error details:', {
-    message: err.message,
+    ...errorResponse,
     stack: err.stack,
-    timestamp: new Date().toISOString(),
     path: req.path,
-    method: req.method
+    method: req.method,
+    ip: req.ip
   });
-  
-  res.status(500).json({ 
-    error: 'Internal Server Error', 
-    details: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message
+
+  res.status(errorResponse.status).json(errorResponse);
+});
+
+// Graceful shutdown handler
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received. Closing server...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
   });
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Server started at: ${new Date().toISOString()}`);
 });
