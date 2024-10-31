@@ -10,7 +10,7 @@
     "start": "node server.js",
     "build": "cd client && npm install && npm run build && mv build ../",
     "test": "react-scripts test",
-    "install-client": "cd build && npm install",
+    "install-client": "cd client && npm install",
     "install-server": "npm install"
   },
   "dependencies": {
