@@ -8,10 +8,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "cd client && npm install && npm run build && mv build ../",
-    "test": "react-scripts test",
-    "install-client": "cd client && npm install",
-    "install-server": "npm install"
+    "build": "react-scripts build",
+    "install-all": "npm install"
   },
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
