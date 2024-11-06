@@ -1,5 +1,3 @@
-Here’s a sample README.md for your Pepe NFT Generator project:
-
 Pepe NFT Generator
 
 Welcome to the Pepe NFT Generator! This project allows users to generate unique Pepe-themed NFTs on the blockchain. Each NFT features distinctive attributes and qualities, making every generated Pepe truly one-of-a-kind.
@@ -70,9 +68,21 @@ Contributing
 
 Contributions are welcome! Please follow these steps:
 	1.	Fork the repository.
-	2.	Create a new branch for your feature (git checkout -b feature-name).
-	3.	Commit your changes (git commit -m 'Add feature').
-	4.	Push to the branch (git push origin feature-name).
+	2.	Create a new branch for your feature:
+
+git checkout -b feature-name
+
+
+	3.	Commit your changes:
+
+git commit -m 'Add feature'
+
+
+	4.	Push to the branch:
+
+git push origin feature-name
+
+
 	5.	Submit a pull request.
 
 License
