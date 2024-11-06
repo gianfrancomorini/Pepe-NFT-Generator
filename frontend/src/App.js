@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 
+// Create configured axios instance
+const api = axios.create({
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'https://www.pepenftgenerator.xyz/api'
+    : 'http://localhost:8080/api',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Your existing contract configurations remain the same
+
 // Contract configurations
 const contractABI = [
     {
@@ -432,8 +445,6 @@ const PEPE_ABI = [
   'function transfer(address recipient, uint256 amount) external returns (bool)'
 ];
 
-// API URL configuration
-const API_URL = 'https://www.pepenftgenerator.xyz/api';
 
 function App() {
   // State declarations
@@ -451,6 +462,8 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [metadataUrl, setMetadataUrl] = useState(null);
   const [error, setError] = useState(null);
+
+  // Your existing useEffect for Web3 initialization remains the same
 
   useEffect(() => {
     const initEthers = async () => {
@@ -500,6 +513,7 @@ function App() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+// Updated handleSubmit with proper error handling and API calls
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
@@ -515,45 +529,43 @@ function App() {
         throw new Error(`Please fill in: ${missingFields.join(', ')}`);
       }
       
-      // Generate image
-      const imageResponse = await axios.post(
-        `${API_URL}/generate-image`,
-        formData,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      // Generate image using configured axios instance
+      const imageResponse = await api.post('/generate-image', formData);
+      
+      if (!imageResponse.data || !imageResponse.data.imageUrl) {
+        throw new Error('Invalid response from image generation');
+      }
       
       const imageUrl = imageResponse.data.imageUrl;
       setGeneratedImage(imageUrl);
       
-      // Create and upload metadata
-      const metadata = {
-        name: `Pepe NFT #${Date.now()}`,
-        description: "A unique Pepe NFT with custom attributes",
-        image: imageUrl,
-        attributes: Object.entries(formData).map(([trait_type, value]) => ({
-          trait_type,
-          value
-        }))
-      };
-  
-      const metadataResponse = await axios.post(
-        `${API_URL}/upload-metadata`,
-        metadata,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-      
-      setMetadataUrl(metadataResponse.data.metadataUrl);
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error.response?.data?.error || error.message || 'An error occurred');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+ // Create and upload metadata
+ const metadata = {
+  name: `Pepe NFT #${Date.now()}`,
+  description: "A unique Pepe NFT with custom attributes",
+  image: imageUrl,
+  attributes: Object.entries(formData).map(([trait_type, value]) => ({
+    trait_type,
+    value
+  }))
+};
+
+const metadataResponse = await api.post('/upload-metadata', metadata);
+
+if (!metadataResponse.data || !metadataResponse.data.metadataUrl) {
+  throw new Error('Invalid response from metadata upload');
+}
+
+setMetadataUrl(metadataResponse.data.metadataUrl);
+} catch (error) {
+console.error('Error:', error);
+setError(error.response?.data?.error || error.message || 'An error occurred');
+} finally {
+setIsGenerating(false);
+}
+};
+
+  // Your existing mintNFT function remains the same
 
   const mintNFT = async () => {
     if (!contract || !metadataUrl) {
@@ -569,6 +581,8 @@ function App() {
       setError(`Failed to mint NFT: ${error.message}`);
     }
   };
+
+    // Your existing JSX remains the same
 
   return (
     <div className="App">

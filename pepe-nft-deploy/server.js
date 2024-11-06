@@ -14,40 +14,40 @@ const app = express();
 // Trust proxy - required for EB ALB
 app.set('trust proxy', true);
 
-// Helmet configuration adjusted for EB
+// Helmet configuration adjusted for image generation
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https:", "http:", "wss:", "ws:"],
-      fontSrc: ["'self'", "data:", "https:", "http:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "https://*.pinata.cloud", "https://gateway.pinata.cloud"],
+      connectSrc: ["'self'", "https:", "wss:", "https://*.pinata.cloud", "https://gateway.pinata.cloud"],
+      fontSrc: ["'self'", "data:", "https:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'self'"],
     },
   },
   crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: false,
 }));
 
-// Rate limiting - adjusted for EB
+// Rate limiting configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path === '/api/health',
-  trusted: true // Required for EB proxy setup
+  trusted: true
 });
 
 // API rate limiting
 app.use('/api/', limiter);
 
-// CORS configuration
+// Updated CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://www.pepenftgenerator.xyz', 'https://pepenftgenerator.xyz']
@@ -55,10 +55,26 @@ const corsOptions = {
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  maxAge: 86400 // CORS preflight cache - 24 hours
+  maxAge: 86400,
+  optionsSuccessStatus: 204
 };
+
 app.use(cors(corsOptions));
 
+// Additional security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 
+    process.env.NODE_ENV === 'production' 
+      ? 'https://www.pepenftgenerator.xyz' 
+      : '*'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  next();
+});
+
+// Rest of your existing code remains the same...
 // Body parser config
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
