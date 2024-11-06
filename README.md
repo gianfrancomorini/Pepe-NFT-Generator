@@ -24,19 +24,19 @@ Installation
 
 1.	Clone the repository:
 
-•	git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
+	•	git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
 
 
 2.	Navigate into the project directory:
 
-•	cd Pepe-NFT-Generator
+	•	cd Pepe-NFT-Generator
 
 
 3.	Install dependencies:
 
-•	npm install
+	•	npm install
 or
-•	yarn install
+	•	yarn install
 
 
 
@@ -45,9 +45,9 @@ Usage
 To generate and mint a Pepe NFT:
 	1.	Run the application:
 
-•	npm start
+	•	npm start
 or
-•	yarn start
+	•	yarn start
 
 
 	2.	Follow the prompts to configure your NFT’s attributes and initiate the minting process.
@@ -70,17 +70,17 @@ Contributions are welcome! Please follow these steps:
 1.	Fork the repository.
 2.	Create a new branch for your feature:
 
-•	git checkout -b feature-name
+	•	git checkout -b feature-name
 
 
 3.	Commit your changes:
 
-•	git commit -m 'Add feature'
+	•	git commit -m 'Add feature'
 
 
 4.	Push to the branch:
 
-•	git push origin feature-name
+	•	git push origin feature-name
 
 
 5.	Submit a pull request.
