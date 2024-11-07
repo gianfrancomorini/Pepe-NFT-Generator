@@ -14,7 +14,7 @@ const app = express();
 // Trust proxy - required for EB ALB
 app.set('trust proxy', true);
 
-// Helmet configuration adjusted for image generation
+// Update your Helmet configuration
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -27,6 +27,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'self'"],
+      frameAncestors: ["'self'"]
     },
   },
   crossOriginEmbedderPolicy: false,
@@ -47,10 +48,11 @@ const limiter = rateLimit({
 // API rate limiting
 app.use('/api/', limiter);
 
-// Updated CORS configuration
+// Update your CORS configuration section in server.js with this:
+
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://www.pepenftgenerator.xyz', 'https://pepenftgenerator.xyz']
+    ? ['https://pepenftgenerator.xyz', 'https://www.pepenftgenerator.xyz']
     : true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

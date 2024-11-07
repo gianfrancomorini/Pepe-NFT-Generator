@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 // Create configured axios instance
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://www.pepenftgenerator.xyz/api'
+    ? 'https://pepenftgenerator.xyz/api'
     : 'http://localhost:8080/api',
   withCredentials: true,
   headers: {
