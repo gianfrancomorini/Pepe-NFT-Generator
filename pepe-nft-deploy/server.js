@@ -14,26 +14,45 @@ const app = express();
 // Trust proxy - required for EB ALB
 app.set('trust proxy', true);
 
-// Update your Helmet configuration in server.js
+// Update Helmet configuration with CSP disabled since we'll set it manually
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:", "http:", "https://*.pinata.cloud", "https://gateway.pinata.cloud"],
-      connectSrc: ["'self'", "https:", "wss:", "https://*.pinata.cloud", "https://gateway.pinata.cloud"],
-      fontSrc: ["'self'", "data:", "https:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'self'"],
-      frameAncestors: ["'self'", "https://pepenftgenerator.xyz", "https://www.pepenftgenerator.xyz"] // Add this line
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP in helmet
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: false,
 }));
+
+// Add comprehensive security headers including CSP
+app.use((req, res, next) => {
+  // Set CSP with all required directives including MetaMask
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.metamask.io",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: http: https://*.pinata.cloud https://gateway.pinata.cloud",
+      "connect-src 'self' https: wss: https://*.pinata.cloud https://gateway.pinata.cloud https://*.infura.io https://*.metamask.io",
+      "font-src 'self' data: https:",
+      "object-src 'none'",
+      "media-src 'self'",
+      "frame-src 'self' https://*.metamask.io",
+      "frame-ancestors 'self' https://pepenftgenerator.xyz https://www.pepenftgenerator.xyz",
+    ].join('; ')
+  );
+  
+  // Additional security headers
+  res.setHeader('Access-Control-Allow-Origin', 
+    process.env.NODE_ENV === 'production' 
+      ? 'https://pepenftgenerator.xyz' 
+      : '*'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  next();
+});
 
 // Rate limiting configuration
 const limiter = rateLimit({
@@ -48,8 +67,7 @@ const limiter = rateLimit({
 // API rate limiting
 app.use('/api/', limiter);
 
-// Update your CORS configuration section in server.js with this:
-
+// Update CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://pepenftgenerator.xyz', 'https://www.pepenftgenerator.xyz']
@@ -63,21 +81,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Additional security headers middleware
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 
-    process.env.NODE_ENV === 'production' 
-      ? 'https://pepenftgenerator.xyz' 
-      : '*'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400');
-  next();
-});
-
-// Rest of your existing code remains the same...
 // Body parser config
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -130,8 +133,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json(health);
 });
 
-
-// Your existing API endpoints remain the same
+// API endpoints
 app.post('/api/generate-image', async (req, res) => {
   console.log('Received generate-image request:', req.body);
   
@@ -215,7 +217,6 @@ app.use((err, req, res, next) => {
     timestamp: new Date().toISOString()
   };
 
-  // Log error details
   console.error('Error details:', {
     ...errorResponse,
     stack: err.stack,
