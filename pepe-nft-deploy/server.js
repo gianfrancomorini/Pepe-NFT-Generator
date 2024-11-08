@@ -14,7 +14,7 @@ const app = express();
 // Trust proxy - required for EB ALB
 app.set('trust proxy', true);
 
-// Update your Helmet configuration
+// Update your Helmet configuration in server.js
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -27,7 +27,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'self'"],
-      frameAncestors: ["'self'"]
+      frameAncestors: ["'self'", "https://pepenftgenerator.xyz", "https://www.pepenftgenerator.xyz"] // Add this line
     },
   },
   crossOriginEmbedderPolicy: false,
@@ -67,11 +67,12 @@ app.use(cors(corsOptions));
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 
     process.env.NODE_ENV === 'production' 
-      ? 'https://www.pepenftgenerator.xyz' 
+      ? 'https://pepenftgenerator.xyz' 
       : '*'
   );
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Max-Age', '86400');
   next();
 });
