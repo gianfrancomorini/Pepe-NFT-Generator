@@ -46,7 +46,7 @@ const PepeInstructions = () => {
           </span>
         </h5>
         <h5 className="flex items-start">
-          <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">6</span>
+          <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">7</span>
           <span className="text-base">
             To see your NFT, go to{' '}
             <a 
