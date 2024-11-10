@@ -239,62 +239,122 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <img 
-        src="/pepe-smart.png" 
-        alt="Pepe Smart" 
-        style={{ width: '300px', height: '300px' }} 
-      />
-      <h1>Pepe NFT Generator</h1>
-      <h5>1- Connect your Metamask Wallet on Ethereum Mainnet</h5>
-      <h5>2- App will display your PEPE 0x69 balance </h5>
-      <h5>3- Wanna generate a Pepe? Switch to Sepolia Testnet.</h5>
-      <h5>4- Fill the desired fields and click "Generate Pepe". </h5>
-      <h5>5- You like what you see? To mint your NFT, click "Mint NFT" </h5>
-      <h5>6- Be sure you have enough test ETH. You can obtain some for free at a Sepolia faucet like https://www.alchemy.com/faucets/ethereum-sepolia</h5>
-      <h5>7- To see your NFT, go to https://testnets.opensea.io/</h5>
-      <h5>8- Nice! Enjoy your Pepe kek</h5>
-
-      <div className="wallet-info">
-        {account ? (
-          <div>
-            <p>Connected: {account}</p>
-            <p>PEPE Balance: {pepeBalance ? `${pepeBalance} PEPE` : 'Loading...'}</p>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <div className="text-center mb-8">
+          <img 
+            src="/pepe-smart.png" 
+            alt="Pepe Smart" 
+            className="w-48 h-48 mx-auto mb-4"
+          />
+          <h1 className="text-3xl font-bold text-green-600 mb-6">Pepe NFT Generator</h1>
+          
+          <div className="space-y-3 text-left max-w-2xl mx-auto mb-8">
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">1</span>
+              <span>Connect your Metamask Wallet on Ethereum Mainnet</span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">2</span>
+              <span>App will display your PEPE 0x69 balance</span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">3</span>
+              <span>Wanna generate a Pepe? Switch to Sepolia Testnet</span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">4</span>
+              <span>Fill the desired fields and click "Generate Pepe"</span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">5</span>
+              <span>You like what you see? To mint your NFT, click "Mint NFT"</span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">6</span>
+              <span>Be sure you have enough test ETH. You can obtain some for free at a Sepolia faucet like{' '}
+                <a href="https://www.alchemy.com/faucets/ethereum-sepolia" 
+                   className="text-blue-500 hover:text-blue-700 underline"
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                  Alchemy Faucet
+                </a>
+              </span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">7</span>
+              <span>To see your NFT, go to{' '}
+                <a href="https://testnets.opensea.io/" 
+                   className="text-blue-500 hover:text-blue-700 underline"
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                  OpenSea Testnet
+                </a>
+              </span>
+            </h5>
+            <h5 className="flex items-start">
+              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">8</span>
+              <span>Nice! Enjoy your Pepe kek</span>
+            </h5>
           </div>
-        ) : (
-          <button onClick={() => window.ethereum.request({ method: 'eth_requestAccounts' })}>
-            Connect Wallet
+        </div>
+
+        <div className="wallet-info mb-6 p-4 bg-gray-50 rounded-lg">
+          {account ? (
+            <div className="space-y-2">
+              <p className="font-mono text-sm">Connected: {account}</p>
+              <p className="font-bold">PEPE Balance: {pepeBalance ? `${pepeBalance} PEPE` : 'Loading...'}</p>
+            </div>
+          ) : (
+            <button 
+              onClick={() => window.ethereum.request({ method: 'eth_requestAccounts' })}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              Connect Wallet
+            </button>
+          )}
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {['emotion', 'clothes', 'accessories', 'background'].map(field => (
+            <input
+              key={field}
+              type="text"
+              name={field}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              value={formData[field]}
+              onChange={handleInputChange}
+              required
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          ))}
+          <button 
+            type="submit" 
+            disabled={isGenerating}
+            className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors disabled:bg-gray-400"
+          >
+            {isGenerating ? 'Generating...' : 'Generate Pepe'}
           </button>
+        </form>
+        
+        {error && (
+          <p className="mt-4 p-3 bg-red-100 text-red-700 rounded">{error}</p>
+        )}
+        
+        {generatedImage && metadataUrl && (
+          <div className="mt-6 text-center">
+            <img src={generatedImage} alt="Generated Pepe" className="max-w-md mx-auto rounded-lg shadow-lg" />
+            <button 
+              onClick={mintNFT}
+              className="mt-4 bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 transition-colors"
+            >
+              Mint NFT
+            </button>
+          </div>
         )}
       </div>
-      
-      <form onSubmit={handleSubmit}>
-        {['emotion', 'clothes', 'accessories', 'background'].map(field => (
-          <input
-            key={field}
-            type="text"
-            name={field}
-            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-            value={formData[field]}
-            onChange={handleInputChange}
-            required
-          />
-        ))}
-        <button type="submit" disabled={isGenerating}>
-          {isGenerating ? 'Generating...' : 'Generate Pepe'}
-        </button>
-      </form>
-      
-      {error && <p className="error">{error}</p>}
-      
-      {generatedImage && metadataUrl && (
-        <div>
-          <img src={generatedImage} alt="Generated Pepe" style={{ maxWidth: '400px' }} />
-          <button onClick={mintNFT}>Mint NFT</button>
-        </div>
-      )}
     </div>
   );
-}
+};
 
 export default App;
