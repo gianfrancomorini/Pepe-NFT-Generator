@@ -13,34 +13,30 @@ const PepeInstructions = () => {
   ];
 
   return (
-    <div className="mx-auto mb-8 p-4 bg-white rounded-lg shadow-sm overflow-visible">
-      <div className="text-center">
+    <div className="w-full max-w-4xl mx-auto mb-8 p-6 bg-white rounded-lg shadow-lg">
+      <div className="text-center mb-8">
         <img 
           src="/api/placeholder/192/192"
           alt="Pepe Smart" 
-          className="w-48 h-48 mx-auto mb-4 rounded-lg"
+          className="w-48 h-48 mx-auto mb-6 rounded-lg shadow-md"
         />
-        <h1 className="text-3xl font-bold text-green-600 mb-6">Pepe NFT Generator</h1>
+        <h1 className="text-4xl font-bold text-green-600 mb-8">Pepe NFT Generator</h1>
       </div>
       
-      <div className="space-y-4 max-w-2xl mx-auto">
-        {instructions.map((text, index) => {
-          console.log(`Rendering instruction ${index + 1}: ${text}`); // Debug line
-          return (
-            <div key={index} className="flex items-start mb-4">
-              <span className="inline-flex items-center justify-center bg-green-500 text-white rounded-full w-6 h-6 mr-2 flex-shrink-0">
-                {index + 1}
-              </span>
-              <span className="text-base text-gray-700">{text}</span>
+      <div className="space-y-6">
+        {instructions.map((text, index) => (
+          <div key={index} className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">
+              {index + 1}
             </div>
-          );
-        })}
+            <p className="text-lg text-gray-700 pt-1">{text}</p>
+          </div>
+        ))}
 
-        {/* Add the links separately */}
-        <div className="mt-4">
+        <div className="mt-8 space-y-4">
           <a 
             href="https://www.alchemy.com/faucets/ethereum-sepolia" 
-            className="text-blue-500 hover:text-blue-700 underline block mb-2"
+            className="block text-lg text-blue-600 hover:text-blue-800 underline"
             target="_blank" 
             rel="noopener noreferrer"
           >
@@ -48,7 +44,7 @@ const PepeInstructions = () => {
           </a>
           <a 
             href="https://testnets.opensea.io/" 
-            className="text-blue-500 hover:text-blue-700 underline block"
+            className="block text-lg text-blue-600 hover:text-blue-800 underline"
             target="_blank" 
             rel="noopener noreferrer"
           >
