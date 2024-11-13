@@ -588,4 +588,4 @@ function App() {
   );
 };
 
-export default PepeNFTGenerator;
+export default App;
