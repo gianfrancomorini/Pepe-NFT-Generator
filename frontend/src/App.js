@@ -430,61 +430,45 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        {/* Instructions Section */}
-        <div className="text-center mb-8">
-          <img 
-            src="/api/placeholder/192/192"
-            alt="Pepe Smart" 
-            className="w-48 h-48 mx-auto mb-4"
-          />
-          <h1 className="text-3xl font-bold text-green-600 mb-6">Pepe NFT Generator</h1>
-          
-          <div className="text-left max-w-2xl mx-auto space-y-4">
-            <div className="instruction-step">
-              <strong>1.</strong> Connect your Metamask Wallet on Ethereum Mainnet
-            </div>
-            <div className="instruction-step">
-              <strong>2.</strong> App will display your PEPE 0x69 balance
-            </div>
-            <div className="instruction-step">
-              <strong>3.</strong> Wanna generate a Pepe? Switch to Sepolia Testnet
-            </div>
-            <div className="instruction-step">
-              <strong>4.</strong> Fill the desired fields and click "Generate Pepe"
-            </div>
-            <div className="instruction-step">
-              <strong>5.</strong> You like what you see? To mint your NFT, click "Mint NFT"
-            </div>
-            <div className="instruction-step">
-              <strong>6.</strong> Be sure you have enough test ETH. You can obtain some for free at a Sepolia faucet
-            </div>
-            <div className="instruction-step">
-              <strong>7.</strong> To see your NFT, go to OpenSea Testnet
-            </div>
-            <div className="instruction-step">
-              <strong>8.</strong> Nice! Enjoy your Pepe kek
-            </div>
+    <div style={{padding: "20px", maxWidth: "1000px", margin: "0 auto"}}>
+      <div style={{backgroundColor: "white", padding: "20px", borderRadius: "8px"}}>
+        <img 
+          src="/api/placeholder/192/192"
+          alt="Pepe Smart" 
+          style={{width: "192px", height: "192px", margin: "0 auto", display: "block"}}
+        />
+        
+        <h1 style={{textAlign: "center", color: "#059669", marginBottom: "20px"}}>
+          Pepe NFT Generator
+        </h1>
 
-            <div className="mt-6">
-              <a 
-                href="https://www.alchemy.com/faucets/ethereum-sepolia" 
-                className="block text-blue-500 hover:text-blue-700 underline mb-2"
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                Get test ETH from Alchemy Faucet
-              </a>
-              <a 
-                href="https://testnets.opensea.io/" 
-                className="block text-blue-500 hover:text-blue-700 underline"
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                View on OpenSea Testnet
-              </a>
-            </div>
+        <div style={{marginBottom: "40px"}}>
+          <p style={{marginBottom: "10px"}}><strong>1.</strong> Connect your Metamask Wallet on Ethereum Mainnet</p>
+          <p style={{marginBottom: "10px"}}><strong>2.</strong> App will display your PEPE 0x69 balance</p>
+          <p style={{marginBottom: "10px"}}><strong>3.</strong> Wanna generate a Pepe? Switch to Sepolia Testnet</p>
+          <p style={{marginBottom: "10px"}}><strong>4.</strong> Fill the desired fields and click "Generate Pepe"</p>
+          <p style={{marginBottom: "10px"}}><strong>5.</strong> You like what you see? To mint your NFT, click "Mint NFT"</p>
+          <p style={{marginBottom: "10px"}}><strong>6.</strong> Be sure you have enough test ETH. You can obtain some for free at a Sepolia faucet</p>
+          <p style={{marginBottom: "10px"}}><strong>7.</strong> To see your NFT, go to OpenSea Testnet</p>
+          <p style={{marginBottom: "10px"}}><strong>8.</strong> Nice! Enjoy your Pepe kek</p>
+
+          <div style={{marginTop: "20px"}}>
+            <a 
+              href="https://www.alchemy.com/faucets/ethereum-sepolia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{color: "#3B82F6", textDecoration: "underline", display: "block", marginBottom: "10px"}}
+            >
+              Get test ETH from Alchemy Faucet
+            </a>
+            <a 
+              href="https://testnets.opensea.io/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{color: "#3B82F6", textDecoration: "underline", display: "block"}}
+            >
+              View on OpenSea Testnet
+            </a>
           </div>
         </div>
 
@@ -493,21 +477,45 @@ function App() {
           {/* Your wallet information display */}
         </div>
         
-        {/* Keep your existing form section */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           {/* Your form fields */}
         </form>
         
         {error && (
-          <p className="mt-4 p-3 bg-red-100 text-red-700 rounded">{error}</p>
+          <p style={{
+            marginTop: "20px",
+            padding: "12px",
+            backgroundColor: "#FEE2E2",
+            color: "#B91C1C",
+            borderRadius: "4px"
+          }}>
+            {error}
+          </p>
         )}
         
         {generatedImage && metadataUrl && (
-          <div className="mt-6 text-center">
-            <img src={generatedImage} alt="Generated Pepe" className="max-w-md mx-auto rounded-lg shadow-lg" />
+          <div style={{marginTop: "20px", textAlign: "center"}}>
+            <img 
+              src={generatedImage} 
+              alt="Generated Pepe" 
+              style={{
+                maxWidth: "400px",
+                margin: "0 auto",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+              }}
+            />
             <button 
               onClick={mintNFT}
-              className="mt-4 bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600 transition-colors"
+              style={{
+                marginTop: "20px",
+                backgroundColor: "#8B5CF6",
+                color: "white",
+                padding: "8px 24px",
+                borderRadius: "4px",
+                border: "none",
+                cursor: "pointer"
+              }}
             >
               Mint NFT
             </button>
