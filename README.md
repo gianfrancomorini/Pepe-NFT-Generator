@@ -1,94 +1,111 @@
-# Pepe NFT Generator
+Pepe NFT Generator
 
-Welcome to the Pepe NFT Generator! This project allows users to generate unique Pepe-themed NFTs on the blockchain. Each NFT features distinctive attributes and qualities, making every generated Pepe truly one-of-a-kind.
+Welcome to the Pepe NFT Generator! This project is a web application designed to create and mint custom Pepe NFTs based on user inputs. It’s a complete full-stack solution with a React frontend and a Node.js/Express backend, deployed to AWS Elastic Beanstalk. Explore your creativity and bring your Pepe ideas to life!
 
-# Project Overview
+Features
 
-The Pepe NFT Generator is designed for anyone interested in creating and collecting NFTs featuring Pepe the Frog. Leveraging this generator, users can mint personalized NFTs and even batch-create collections. This project is perfect for artists, developers, and NFT enthusiasts who want to contribute to the growing universe of Pepe collectibles.
+Frontend
 
-# Features
+	•	User Input Form: Collects user inputs such as emotion, clothes, accessories, and background.
+	•	AI Image Generation: Sends the input data to the backend for AI-based image generation using OpenAI.
+	•	NFT Minting: Allows users to mint the generated Pepe images as NFTs on the blockchain.
+	•	Responsive Design: Optimized for desktop and mobile use.
 
-	•	Unique Pepe Generation: Each generated Pepe NFT is different, with unique attributes and variations.
-	•	Customization Options: Users can adjust parameters to influence the look and rarity of each Pepe.
-	•	Blockchain Integration: NFTs are minted directly onto the blockchain, ensuring true ownership and authenticity.
-	•	Batch Minting: Support for creating multiple NFTs at once to build comprehensive collections.
+Backend
 
-# Prerequisites
+	•	AI Integration: Generates images using OpenAI’s image generation API.
+	•	Pinata Integration: Uploads generated images and metadata to IPFS via Pinata.
+	•	Secure API: Implements security best practices with Helmet, rate limiting, and strict CORS policies.
+	•	Health Checks: Includes enhanced health-check endpoints for AWS Elastic Beanstalk monitoring.
 
-To get started, you’ll need the following:
-•	Node.js (version 14 or later)
-•	NPM or Yarn for package management
-•	A blockchain wallet (MetaMask or similar) to interact with the blockchain
+Deployment
+
+	•	Domain: Hosted on pepenftgenerator.xyz, with SSL secured via AWS Certificate Manager.
+	•	Infrastructure: Frontend and backend deployed on AWS Elastic Beanstalk with S3 for static assets and HTTPS support.
+
+How It Works
+
+	1.	User Input: Fill out the form with desired characteristics (e.g., happy emotion, suit, sunglasses, beach background).
+	2.	Generate Pepe: Click “Generate Pepe” to trigger the AI-based image generation.
+	3.	Mint NFT: If satisfied with the generated image, mint it as an NFT with a single click.
+	4.	Own Your NFT: Your Pepe NFT is minted and stored on the blockchain.
+
+Prerequisites
+
+To set up the project locally, you’ll need:
+	•	Node.js and npm
+	•	React for frontend development
+	•	AWS CLI for Elastic Beanstalk
+	•	Environment variables:
+	•	OPENAI_API_KEY
+	•	PINATA_API_KEY
+	•	PINATA_API_SECRET
 
 Installation
 
-1.	Clone the repository:
+1. Clone the Repository
 
-	•	git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
+git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
+cd Pepe-NFT-Generator
 
+2. Set Up Frontend
 
-2.	Navigate into the project directory:
+cd frontend
+npm install
+npm start
 
-	•	cd Pepe-NFT-Generator
+3. Set Up Backend
 
+cd backend
+npm install
+npm run dev
 
-3.	Install dependencies:
+4. Environment Variables
 
-	•	npm install
-or
-	•	yarn install
+Create a .env file in the backend directory:
 
+OPENAI_API_KEY=your_openai_api_key
+PINATA_API_KEY=your_pinata_api_key
+PINATA_API_SECRET=your_pinata_api_secret
 
+Deployment
 
-Usage
+AWS Elastic Beanstalk
 
-To generate and mint a Pepe NFT:
-	1.	Run the application:
+	1.	Deploy the backend using the AWS CLI:
 
-	•	npm start
-or
-	•	yarn start
-
-
-	2.	Follow the prompts to configure your NFT’s attributes and initiate the minting process.
-
-# Configuration
-
-The project provides a config.json file where you can adjust settings such as:
-	•	Number of NFTs to generate
-	•	Traits and attributes: Customize the features and rarity distributions for each Pepe
-
-# Deployment
-
-This project supports deployment to various platforms. To deploy on a platform like AWS Elastic Beanstalk:
-	1.	Set up your environment variables in .env.
-	2.	Deploy using your preferred method (eb deploy for Elastic Beanstalk or another deployment command for your chosen platform).
-
-# Contributing
-
-Contributions are welcome! Please follow these steps:
-1.	Fork the repository.
-2.	Create a new branch for your feature:
-
-	•	git checkout -b feature-name
+eb init
+eb create
 
 
-3.	Commit your changes:
+	2.	Deploy the frontend:
 
-	•	git commit -m 'Add feature'
-
-
-4.	Push to the branch:
-
-	•	git push origin feature-name
+npm run build
+aws s3 sync build/ s3://your-s3-bucket-name --acl public-read
 
 
-5.	Submit a pull request.
 
-# License
+Domain and SSL
 
-This project is licensed under the MIT License. See the LICENSE file for more information.
+	•	Domain: pepenftgenerator.xyz
+	•	SSL Certificate: Managed by AWS Certificate Manager and associated with the Elastic Load Balancer.
 
-# Contact
+Next Steps
 
-For any questions or collaboration requests, reach out to Gianfranco Morini.
+	1.	Enhancements:
+	•	Integrate user authentication.
+	•	Add cryptocurrency wallet support for $PEPE tokens.
+	•	Implement smart contracts for NFT minting.
+	2.	Expand Functionality:
+	•	Add error handling and validation for better user experience.
+	•	Create a dashboard to view and manage minted NFTs.
+
+Contributing
+
+Contributions are welcome! Please submit a pull request or open an issue if you have suggestions or bug reports.
+
+License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Happy minting! 🎨🐸
