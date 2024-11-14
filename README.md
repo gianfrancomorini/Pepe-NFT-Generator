@@ -1,4 +1,4 @@
-Pepe NFT Generator
+<b>Pepe NFT Generator</b>
 
 Welcome to the Pepe NFT Generator! This project is a web application designed to create and mint custom Pepe NFTs based on user inputs. It’s a complete full-stack solution with a React frontend and a Node.js/Express backend, deployed to AWS Elastic Beanstalk. Explore your creativity and bring your Pepe ideas to life!
 
