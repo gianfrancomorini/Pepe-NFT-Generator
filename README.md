@@ -45,28 +45,28 @@ Installation
 
 1. Clone the Repository
 
-git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
+	git clone https://github.com/gianfrancomorini/Pepe-NFT-Generator.git
 cd Pepe-NFT-Generator
 
 2. Set Up Frontend
 
-cd frontend
-npm install
-npm start
+	cd frontend
+	npm install
+	npm start
 
 3. Set Up Backend
 
-cd backend
-npm install
-npm run dev
+	cd backend
+	npm install
+	npm run dev
 
 4. Environment Variables
 
 Create a .env file in the backend directory:
 
-OPENAI_API_KEY=your_openai_api_key
-PINATA_API_KEY=your_pinata_api_key
-PINATA_API_SECRET=your_pinata_api_secret
+	OPENAI_API_KEY=your_openai_api_key
+	PINATA_API_KEY=your_pinata_api_key
+	PINATA_API_SECRET=your_pinata_api_secret
 
 Deployment
 
@@ -74,14 +74,14 @@ AWS Elastic Beanstalk
 
 	1.	Deploy the backend using the AWS CLI:
 
-eb init
-eb create
+	eb init
+	eb create
 
 
 	2.	Deploy the frontend:
 
-npm run build
-aws s3 sync build/ s3://your-s3-bucket-name --acl public-read
+	npm run build
+	aws s3 sync build/ s3://your-s3-bucket-name --acl public-read
 
 
 
@@ -89,16 +89,6 @@ Domain and SSL
 
 	•	Domain: pepenftgenerator.xyz
 	•	SSL Certificate: Managed by AWS Certificate Manager and associated with the Elastic Load Balancer.
-
-Next Steps
-
-	1.	Enhancements:
-	•	Integrate user authentication.
-	•	Add cryptocurrency wallet support for $PEPE tokens.
-	•	Implement smart contracts for NFT minting.
-	2.	Expand Functionality:
-	•	Add error handling and validation for better user experience.
-	•	Create a dashboard to view and manage minted NFTs.
 
 Contributing
 
